@@ -1,0 +1,93 @@
+.l-screen {
+  grid-column: screen;
+  text-align: center;
+}
+
+d-article {
+ text-align: justify;
+}
+
+.shaded-figure {
+  background-color: hsl(200, 20%, 97%);
+  border-top: 1px solid hsla(0, 0%, 0%, 0.1);
+  border-bottom: 1px solid hsla(0, 0%, 0%, 0.1);
+  padding: 30px 0;
+}
+
+.label {
+    fill: rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 1rem 0 0 0;
+}
+
+figure {
+  text-align: center;
+}
+
+figcaption {
+  text-align: left;
+}
+
+.axis text {
+  fill: rgba(0,0,0,0.6);
+}
+
+.axis path, .axis line {
+  stroke: rgba(0,0,0,0.6);
+}
+
+.plot {
+  background: rgb(252, 252, 252);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+rect.plot {
+  fill: rgb(252, 252, 252);
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 1px;
+}
+
+.annotation {
+  fill: rgba(0,0,0,0.6);
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.meanCurve {
+  fill: none;
+  stroke: rgba(0,0,0,0.2);
+  stroke-width: 2px;
+}
+.sdLine {
+  fill: none;
+  stroke: rgba(0,0,0,0.2);
+  stroke-width: 2px;
+  stroke-dasharray: 4;
+}
+
+.sdLineArea {
+  fill: none;
+}
+
+.condCircleOutline{
+  fill: transparent;
+  stroke: rgba(0,0,0,0.4);
+  stroke-width: 2px;
+  stroke-dasharray: 2;
+}
+.condCircleOutline.active{
+  stroke: rgba(0,0,0,0.4);
+  stroke-width: 2px;
+  stroke-dasharray: none;
+}
+
+.condCircle{
+  fill: transparent;
+  stroke: none;
+}
+.condCircle.active{
+  fill: rgba(0, 0, 0, 0.6);
+  stroke: none;
+}
+
