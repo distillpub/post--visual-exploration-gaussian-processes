@@ -26,6 +26,19 @@
 <meta name="citation_firstpage" content="1">
 <meta name="citation_keywords" content="visualization, machine learning, explainability, gaussian processes, artificial intelligence, explainable artificial intelligence">
 
+<!-- OG meta tags -->
+<meta property='og:title' content="A Visual Exploration of Gaussian Processes">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.jgoertler.com/visual-exploration-gaussian-processes/">
+<meta property="og:image" content="">
+<meta property="og:description" content="How to turn a collection of small building blocks into a versatile tool for solving regression problems.">
+<meta property="og:site_name" content="Jochen G√∂rtler">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-12-03">
+<meta property="article:author" content="G√∂rtler, Jochen">
+<meta property="article:author" content="Kehlbeck, Rebecca">
+<meta property="article:author" content="Deussen, Oliver">
+
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122647105-1"></script>
 <script>
@@ -81,14 +94,14 @@
   </p>
   <p>Gaussian processes are a powerful tool in the machine learning toolbox
     <d-cite key="Rasmussen2004"></d-cite>
-    . They allow us to make predictions about our data based on prior knowledge.
+    . They allow us to make predictions about our data by incorporating prior knowledge.
     Their most obvious area of application are regression problems, for example in robotics, but they can also be
     extended to classification and clustering tasks
     <d-cite key="Kapoor2010, Kim2007"></d-cite>
     . Just a quick recap: the goal of regression is to find a function that describes a given set of data points as
     closely as possible. This process is called <i>fitting</i> a function to the data.
     For a given set of training points, there are potentially infinitely many functions that fit the data. Gaussian
-    processes offer an elegant solution to this problem by assigning a probability to each of these functions. The mean
+    processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>. The mean
     of this probability distribution then represents the most probable characterization of the data. Furthermore,
     using a probabilistic approach allows us to incorporate the confidence of the prediction into the regression result.
   </p>
@@ -104,7 +117,8 @@
   </p>
 
     <h2>Multivariate Gaussian distributions</h2>
-  <p>Before we can explore Gaussian processes, we need to understand the mathematical concepts they are based on. As the
+  <p>
+    Before we can explore Gaussian processes, we need to understand the mathematical concepts they are based on. As the
     name suggests, the Gaussian distribution (which is often also referred to as <i>normal</i> distribution) is the
     basic building block of Gaussian processes. In particular, we are interested in the multivariate case of this
     distribution, where each random variable is distributed normally and their joint distribution is also Gaussian. In
@@ -115,7 +129,7 @@
     .
   </p>
 
-    <p>The mean vector <d-math>\mu</d-math> describes the expected value of the distribution. Each of its components describes the mean of the corresponding dimension. <d-math>\Sigma</d-math> models the variance along each dimension and determines how the different random variables are correlated. The covariance matrix is always symetric and positive semi-definite<d-cite key="Hazewinkel1994"></d-cite>. The diagonal of <d-math>\Sigma</d-math> consists of the standard deviation <d-math>\sigma_i</d-math> of the <d-math>i</d-math>-th random variable, whereas the off-diagonal elements describe correlations between each of the components <d-math>\sigma_{ij}</d-math>.</p>
+    <p>The mean vector <d-math>\mu</d-math> describes the expected value of the distribution. Each of its components describes the mean of the corresponding dimension. <d-math>\Sigma</d-math> models the variance along each dimension and determines how the different random variables are correlated. The covariance matrix is always symmetric and positive semi-definite<d-cite key="Hazewinkel1994"></d-cite>. The diagonal of <d-math>\Sigma</d-math> consists of the standard deviation <d-math>\sigma_i</d-math> of the <d-math>i</d-math>-th random variable, whereas the off-diagonal elements describe correlations between each of the components <d-math>\sigma_{ij}</d-math>.</p>
 
     <d-math block>
         X = \begin{bmatrix} X_1 \\ X_2 \\ \vdots \\ X_n \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma)
@@ -293,7 +307,7 @@
 
     <p>
       Kernels are widely used in machine learning, for example in <i>support vector machines</i><d-cite key="Vapnik2000"></d-cite>.
-      The reason for this is that they allow similarity measures that go far beyond the standard euclidean distance (<d-math>L2</d-math>-norm).
+      The reason for this is that they allow similarity measures that go far beyond the standard euclidean distance (<d-math>L2</d-math>-distance).
       Many of these kernels conceptually embed the input points into a higher dimensional space in which they then measure the similarity<d-footnote>If the kernel follows Mercer's theorem it can be used to define a Hilbert space. More information on this can be found on <a href="https://en.wikipedia.org/wiki/Kernel_method">Wikipedia</a>.</d-footnote>.
       The <a href="#MultipleKernels">following figure</a> shows examples of some common kernels for Gaussian processes.
       For each kernel, the covariance matrix has been created from <d-math>N=25</d-math> linear spaced values ranging from <d-math>[-5,5]</d-math>. Each entry in the matrix shows the covariance between points in the range of <d-math>[0,1]</d-math>.
