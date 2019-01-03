@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/grtlr/gau.svg?token=M7qsxhpGdq7xqyuVznBq&branch=master)](https://travis-ci.com/grtlr/gau)
+[![Build Status](https://travis-ci.com/grtlr/visual-exploration-gaussian-processes.svg?token=M7qsxhpGdq7xqyuVznBq&branch=master)](https://travis-ci.com/grtlr/visual-exploration-gaussian-processes)
 
 ## Development
 
