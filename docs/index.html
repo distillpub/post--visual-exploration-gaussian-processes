@@ -5,7 +5,7 @@
 <script>
   window.addEventListener('WebComponentsReady', function () {
     const loaderTag = document.createElement('script');
-    loaderTag.src = 'template.v2.js';
+    loaderTag.src = 'js/template.v2.js';
     document.head.insertBefore(loaderTag, document.head.firstChild);
     const loaderTag2 = document.createElement('script');
     loaderTag2.src = 'js/bundle.js';
@@ -32,10 +32,10 @@
 <meta property="og:url" content="https://www.jgoertler.com/visual-exploration-gaussian-processes/">
 <meta property="og:image" content="">
 <meta property="og:description" content="How to turn a collection of small building blocks into a versatile tool for solving regression problems.">
-<meta property="og:site_name" content="Jochen G√∂rtler">
+<meta property="og:site_name" content="Jochen Görtler">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2018-12-03">
-<meta property="article:author" content="G√∂rtler, Jochen">
+<meta property="article:author" content="Görtler, Jochen">
 <meta property="article:author" content="Kehlbeck, Rebecca">
 <meta property="article:author" content="Deussen, Oliver">
 
@@ -85,6 +85,7 @@
   <d-figure id="Teaser" class="l-screen shaded-figure"></d-figure>
 </d-title>
 <d-article>
+    <h3>This article was presented at <a href="http://visxai.io/" target="_blank">VISxAI</a>, it is now under review at <a href="https://distill.pub/" target="_blank">distill.pub</a>.</h3>
     <h2>Introduction</h2>
   <p>Even if you have spent some time reading about machine learning, chances are that you have never heard of Gaussian
     processes.
@@ -527,7 +528,7 @@
 </d-article>
 
 <d-appendix>
-    <h3 id="Acknowledgements">Acknowledgements</h3>
+    <h3 id="Acknowledgements">Acknowledgments</h3>
     <p>
       We are very grateful to Carla Avolio and Marc Spicker for their feedback on the manuscript.
       In addition, we want to thank Jonas Körner for helping with the implementation of the figure explaining the multivariate Gaussian distribution.
