@@ -1,0 +1,151 @@
+<div class="gauss-grid">
+  <div class="grid-item">
+    <h4>Marginalization (Y)</h4>
+  </div>
+  <div class="grid-item">
+  </div>
+  <div class="grid-item">
+    <h4>Conditioning (X = {twoDecimals(cond)})</h4>
+  </div>
+  <div class="grid-item">
+      <svg width="{sideWidth}" height="{context.height}" class="plot">
+      <path d="{marginalizedPath}" class="curve"></path>
+      <text x="{sideWidth-42}" y="{toV(context, marginalizedGauss.mean.get(0,0))}" class="annotation">μ<tspan class="ss">Y</tspan> = {twoDecimals(marginalizedGauss.mean.get(0,0))}</text>
+      <text x="5" y="{context.height-10}" class="annotation">σ<tspan class="ss">Y</tspan> = {twoDecimals(marginalizedGauss.cov.get(0,0))}</text>
+    </svg>
+  </div>
+  <div class="grid-item">
+    <svg width="{context.width}" height="{context.height}" class="plot">
+        <InteractiveGaussian
+          ref:gauss context={context}
+          sigma1={gaussian.cov.get(0,0)}
+          sigma2={gaussian.cov.get(1,1)}
+          cov={gaussian.cov.get(0,1)}
+          limits={limits} />
+      <line class="line" x1="{condPos[0]}" y1="0" x2="{condPos[0]}" y2="{context.height}" />
+      <circle ref:handle class="handle" cx="{condPos[0]}" cy="{condPos[1]}" r="4"/>
+      <text x="{condPos[0]+5}" y="{condPos[1]}" class="annotation handle">X = {twoDecimals(cond)}</text>
+    </svg>
+  </div>
+  <div class="grid-item">
+      <svg width="{sideWidth}" height="{context.height}" class="plot">
+      <path d="{conditionedPath}" class="line"></path>
+      <text x="5" y="{toV(context, conditionedGauss.mean.get(0,0))}" class="annotation">μ<tspan class="ss">Y|X</tspan> = {twoDecimals(conditionedGauss.mean.get(0,0))}</text>
+      <text x="5" y="{context.height-10}" class="annotation">σ<tspan class="ss">Y|X</tspan> = {twoDecimals(marginalizedGauss.cov.get(0,0))}</text>
+    </svg>
+  </div>
+</div>
+
+<style>
+  .gauss-grid {
+    display: inline-grid;
+    grid-template-columns: auto auto auto;
+    text-align: center;
+  }
+
+  .grid-item {
+    margin: 0.3em;
+  }
+
+  .line {
+    fill: none;
+    stroke: #c51b8a;
+    stroke-width: 2px;
+  }
+
+  .curve {
+    fill: none;
+    stroke: rgba(0,0,0,0.6);
+    stroke-width: 2px;
+  }
+
+  .handle {
+    fill: #c51b8a;
+  }
+
+  .ss {
+    baseline-shift: sub;
+    font-size: 11px;
+  }
+</style>
+
+<script>
+  import InteractiveGaussian from './InteractiveGaussian.html';
+  import * as gauss from '../gaussian';
+  import * as d3 from 'd3'; 
+  import {Context} from './util/context';
+  import {clamp} from './util/limit';
+
+  const STEP = 0.1;
+
+  export default {
+    components: { InteractiveGaussian },
+    data() {
+      return {
+        limits: {
+          sigma1: {from: 0.8, to: 1.8},
+          sigma2: {from: 0.8, to: 1.8},
+          cov: {from: -0.8, to: 0.8}
+        },
+        context: new Context(250, 250, [-4, 4], [-4, 4]),
+        cond: 1.2, // value for conditioning
+        gaussian: new gauss.Gaussian([0,0], [[1,0.8],[0.8,1.4]]),
+        sideWidth: 200
+      };
+    },
+    oncreate() {
+      this.refs.gauss.on('state', ({ _changed, current, _previous}) => {
+        this.set({ gaussian: current.gaussian });
+      });
+      const { context } = this.get();
+      d3.select(this.refs.handle).call(d3.drag()
+        .on('drag', () => {
+          const padding = 10;
+          const upperLimit = context.width - padding;
+          const lowerLimit = padding;
+          let { cond } = this.get();
+          cond = context.x(clamp(d3.event.x, lowerLimit, upperLimit));
+          this.set({ cond });
+        }));
+    },
+    computed: {
+      condPos: ({ context, cond }) => [context.u(cond), 50],
+      conditionedGauss: ({ gaussian, cond }) => gaussian.condition([cond]),
+      conditionedPath: ({ context, gaussian, cond, sideWidth }) =>  {
+        const x = d3.scaleLinear().domain(context.xDomain()).range([context.height,0]);
+        const y = d3.scaleLinear().domain([0.8, 0]).range([sideWidth, 0]);
+
+        const g = gaussian.condition([cond]);
+        const ys = d3.range(context.yDomain()[0], context.yDomain()[1]+STEP, STEP);
+        const xs = ys.map(x => g.at([x]));
+        const pts = d3.zip(ys,xs);
+        const path = d3.line()
+          .x(d => y(d[1]))
+          .y(d => x(d[0]))(pts);
+        return path;
+      },
+      marginalizedGauss: ({ gaussian }) => gaussian.marginalize(1)[1],
+      marginalizedPath: ({ context, gaussian, sideWidth }) => { 
+        const x = d3.scaleLinear().domain(context.xDomain()).range([0, context.height]);
+        const y = d3.scaleLinear().domain([0, 0.5]).range([sideWidth, 0]);
+
+        const g = gaussian.marginalize(1)[1];
+        const ys = d3.range(context.yDomain()[0], context.yDomain()[1]+STEP, STEP);
+        const xs = ys.map(x => g.at([x]));
+        const pts = d3.zip(ys,xs);
+        const path = d3.line()
+          .x(d => y(d[1]))
+          .y(d => x(d[0]))(pts);
+        return path;
+      }
+    },
+    helpers: {
+      twoDecimals(x) {
+        return Math.round(x * 100) / 100;
+      },
+      toV(context, y) {
+        return context.v(y);
+      }
+    }
+  };
+</script>

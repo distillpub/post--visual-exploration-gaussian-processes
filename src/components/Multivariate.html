@@ -1,0 +1,76 @@
+<div class="gauss-grid">
+    <div class="grid-item">
+        <svg width="{context.width}" height="{context.height}" class="plot">
+            <InteractiveGaussian sigma1="{gaussian.cov.get(0,0)}" sigma2="{gaussian.cov.get(1,1)}"
+                                 cov="{gaussian.cov.get(0,1)}" context="{context}"
+                                 ref:gauss/>
+        </svg>
+    </div>
+    <div class="grid-item">
+      <svg width="450" height="200">
+        <g transform="translate(0,20)">
+          <ColorScale colorScale={scale} />
+        </g>
+        <text x="70" y="40" class="annotation"><tspan font-weight="bold">Covariance matrix (Σ)</tspan></text>
+        <g transform="translate(82,50)">
+          <CovMat2x2 sigma1={twoDecimals(gaussian.cov.get(0,0))} sigma2={twoDecimals(gaussian.cov.get(1,1))}
+             corr={twoDecimals(gaussian.cov.get(0,1))} />
+        </g>
+        <text x="230" y="30" class="annotation">
+        By dragging the handles you 
+        <tspan x="230" dy="1.5em">can adjust the variance along</tspan>
+        <tspan x="230" dy="1.5em">each dimension, as well as the</tspan>
+        <tspan x="230" dy="1.5em">correlation between the two</tspan>
+        <tspan x="230" dy="1.5em">random variables. <tspan fill="rgb(73, 0, 106)" font-style="italic">Violet</tspan></tspan>
+        <tspan x="230" dy="1.5em">values show a high probability</tspan>
+        <tspan x="230" dy="1.5em">inside the distribution.</tspan>
+        </text>
+      </svg>
+  </div>
+</div>
+
+<style>
+    .gauss-grid {
+        display: inline-grid;
+        grid-template-columns: auto auto auto;
+        text-align: center;
+    }
+
+    .grid-item {
+      margin: 5px;
+    }
+
+    .plot {
+        float: left;
+    }
+</style>
+
+<script>
+  import InteractiveGaussian from './InteractiveGaussian.html';
+  import CovMat2x2 from './CovMat2x2.html';
+  import * as gauss from '../gaussian';
+  import {Context} from './util/context';
+  import ColorScale from './ColorScale.html';
+  import * as d3 from 'd3';
+
+  export default {
+    components: {InteractiveGaussian, CovMat2x2, ColorScale},
+    data() {
+      return {
+        scale: d3.scaleSequential(d3.interpolateRdPu).domain([0, 0.2]),
+        context: new Context(200, 200, [-2, 2], [-2, 2]),
+        gaussian: new gauss.Gaussian([0, 0], [[1, 0.7], [0.7, 1]])
+      };
+    },
+    oncreate() {
+      this.refs.gauss.on('update', ({_changed, current, _previous}) => {
+        this.set({gaussian: current.gaussian});
+      });
+    },
+    helpers: {
+      twoDecimals(x) {
+        return Math.round(x * 100) / 100;
+      }
+    }
+  };
+</script>

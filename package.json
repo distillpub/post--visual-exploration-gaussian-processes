@@ -1,0 +1,35 @@
+{
+  "name": "gau",
+  "version": "1.0.0",
+  "description": "Visual exploration of Gaussian Processes",
+  "main": "main.js",
+  "scripts": {
+    "build": "webpack",
+    "serve": "webpack-serve --config ./webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "npm run build && cpx -C \"dist/**/*\" docs",
+    "lint-fix": "eslint --config .eslintrc.json --fix --ext .js,.html src"
+  },
+  "author": "Jochen Görtler; Rebecca Kehlbeck",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "babel-loader": "^8.0.4",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "cpx": "^1.5.0",
+    "eslint": "^5.11.1",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-html": "^5.0.0",
+    "svelte": "^2.9.1",
+    "svelte-loader": "^2.12.0",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.1.2",
+    "webpack-serve": "^2.0.3"
+  },
+  "dependencies": {
+    "d3": "^5.4.0",
+    "ml-matrix": "^5.1.1",
+    "random": "^2.0.12"
+  }
+}

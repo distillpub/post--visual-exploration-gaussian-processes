@@ -1,0 +1,87 @@
+<svg width="700" height="280">
+  <g transform="translate(1,1)">
+    <rect x="0" y="0" width="200" height="150" fill="rgb(252, 252, 252)" stroke="rgba(0, 0, 0, 0.1)" />
+    {#each xs as x}
+    {#if x == 5}
+    <text x="{20*x+6}" y="90" class="annotation"><tspan font-weight="bold">f(x) = ?</tspan></text>
+    <line class="dashed" x1="{20*x+(bs/2)+6}" y1="158" x2="{20*x+(bs/2)+6}" y2="95" stroke="grey"/>
+    {/if}
+    <rect x="{20*x+6}" y="158" width="{bs}" height="{bs}" fill="{idxColor(x)}" />
+    {/each}
+    <text x="0" y="195" class="annotation">
+    We are interested in predicting the
+    <tspan x="0" dy="1.5em">function values for 10 different</tspan>
+    <tspan x="0" dy="1.5em"><tspan font-style="italic">x</tspan> values from [<tspan fill="{idxColor(0)}">■</tspan>,<tspan fill="{idxColor(9)}">■</tspan>] without</tspan>
+    <tspan x="0" dy="1.5em">knowing about training points.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(260,0)">
+    <text x="0" y="11" class="annotation"><tspan font-weight="bold">Covariance matrix</tspan></text>
+    <g transform="translate(0,25)">
+      <line class="dashed" x1="{12*2+12+bs/2}" y1="{bs/2}" x2="{12*2+12+bs/2}" y2="{12*5+12+bs/2}" />
+      <line class="dashed" y1="{12*5+12+bs/2}" x1="{bs/2}" y2="{12*5+12+bs/2}" x2="{12*2+12+bs/2}" />
+      <g transform="translate(50,80)">
+        <text x="0" y="0" class="annotation">= k(<tspan fill="{idxColor(5)}">■</tspan>,<tspan fill="{idxColor(2)}">■</tspan>)</text>
+        <text x="40" y="43" class="annotation">10x10</text>
+      </g>
+      <rect x="12" y="12" width="116" height="116" stroke="black" fill="transparent" />
+      {#each xs as x}
+      <rect x="{12*x+12}" y="0" width="{bs}" height="{bs}" fill="{idxColor(x)}" />
+      <rect x="0" y="{12*x+12}" width="{bs}" height="{bs}" fill="{idxColor(x)}" />
+      {/each}
+      <rect x="{12*2+12}" y="{12*5+12}" width="{bs}" height="{bs}" fill="grey" />
+    </g>
+    <text x="0" y="195" class="annotation">
+    The covariance matrix is
+    <tspan x="0" dy="1.5em">created by pairwise evaluation</tspan>
+    <tspan x="0" dy="1.5em">of the kernel function resulting</tspan>
+    <tspan x="0" dy="1.5em">in a 10-dimensional distribution.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(490,1)">
+    <rect x="0" y="0" width="200" height="150" fill="rgb(252, 252, 252)" stroke="rgba(0, 0, 0, 0.1)" />
+    {#each xs as x}
+    <line class="dashed" x1="{20*x+(bs/2)+6}" y1="158" x2="{20*x+(bs/2)+6}" y2="{Math.sin(x/2)*20+90}" stroke="grey"/>
+    <circle cx="{20*x+(bs/2)+6}" cy="{Math.sin(x/2)*20+90}" r={bs/4} fill="grey" />
+    <rect x="{20*x+6}" y="158" width="{bs}" height="{bs}" fill="{idxColor(x)}" />
+    {/each}
+    <text x="0" y="195" class="annotation">
+    Sampling from this distribution
+    <tspan x="0" dy="1.5em">results in a 10-dimensional vector</tspan>
+    <tspan x="0" dy="1.5em">where each entry represents</tspan>
+    <tspan x="0" dy="1.5em">one function value.</tspan>
+    </text>
+  </g>
+</svg>
+
+<style>
+
+  .dashed {
+    stroke: rgba(0,0,0,0.4);
+    stroke-dasharray: 4;
+  }
+
+</style>
+
+<script>
+  import * as d3 from 'd3';
+
+  const color = d3.scaleSequential(d3.interpolateRdPu).domain([-1,10]);
+
+  export default {
+    data() {
+      return {
+        bs: 8,
+        xs: d3.range(0,10),
+      };
+    },
+
+    helpers: {
+      idxColor(idx) {
+        return color(idx);
+      }
+    }
+  };
+</script>

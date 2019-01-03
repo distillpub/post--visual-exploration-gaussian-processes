@@ -1,0 +1,429 @@
+<div xmlns:bind="http://www.w3.org/1999/xhtml">{#each kernels as k}
+  <label><input type="checkbox" id="checkbox{k.name}" bind:checked=k.active> {k.name}</label>
+  {/each}
+</div>
+<div class="kernel-grid">
+  <div class="grid-item">
+    <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}">
+      <g ref:graph>
+        <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
+        <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}">
+          <!--<line ref:mean x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}" />-->
+          <text x="{context.width - 14}" y="{toV(context, 0)-5}" class="annotation">μ</text>
+          <line class="sdLine" x1="0" y1="{toV(context, 2)}" x2="{context.width}" y2="{toV(context, 2)}"/>
+          <text x="{context.width - 42}" y="{toV(context, 2)-5}" class="annotation">μ + 2σ</text>
+          <line class="sdLine" x1="0" y1="{toV(context, -2)}" x2="{context.width}" y2="{toV(context, -2)}"/>
+          <text x="{context.width - 42}" y="{toV(context, -2)-5}" class="annotation">μ - 2σ</text>
+      </g>
+      <g>
+        {#each trainingPoints as pt, idx}
+        {#if pt.active}
+        <circle cx="{toU(context, pt.x)+(context.width / countDimensions / 2)}" cy="{toV(context, pt.y)}" r="3"
+                fill="rgba(0,0,0,0.6)"/>
+        {/if}
+        <circle on:click="toggle(idx)" class="trainingPoint {pt.active ? 'active' : 'inactive'}"
+                cx="{toU(context, pt.x)+(context.width / countDimensions / 2)}" cy="{toV(context, pt.y)}" r="6"/>
+        {/each}
+      </g>
+      <svg id="info" x="5" y={5} visibility="{kernels.filter(p => p.active).length > 0 ? 'visible' : 'hidden'}"
+           on:mouseover="setFirstClick(false)">
+        <g>
+          <g class="icon">
+            <path d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                  fill="rgb(245, 181, 62)"/>
+            {#if firstClick}
+            <text class="hoverText" x={30} y="1.2em">(hover for information)</text>
+            {/if}
+          </g>
+          <g>
+            <text x={5} y={0} class="annotation">
+              {#each currentParams as pList}
+              <tspan x="5" dy="1.5em">
+                {pList.name}:
+                {#each pList.params as p,i}
+                <tspan fill="rgb(245, 181, 62)" font-style="italic">
+                  {p.name} = {p.value +', '}
+                </tspan>
+                {/each}
+              </tspan>
+              {/each}
+            </text>
+          </g>
+        </g>
+      </svg>
+    </svg>
+  </div>
+  <div class="grid-item">
+    <KernelCovMat ref:covMat external={true} interaction={false} n={countDimensions} width={300} height={300}
+                  offset="{0}" gridSize="{4}" slider="{false}"/>
+  </div>
+</div>
+
+<style>
+
+  #info g:hover .annotation {
+    display: block;
+  }
+
+  #info g:hover .icon {
+    display: none;
+  }
+
+  #info .annotation {
+    display: none;
+  }
+
+  #info .icon {
+    display: block;
+  }
+
+  .hoverText {
+    fill: rgb(245, 181, 62);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .kernel-grid {
+    display: inline-grid;
+    grid-template-columns: auto auto auto;
+  }
+
+  .grid-item {
+    margin: 1em;
+  }
+
+  /*ref:mean {
+    fill: none;
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 2px;
+  }*/
+
+  ref:zero {
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 1px;
+  }
+
+  .sdLine {
+    fill: none;
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 2px;
+    stroke-dasharray: 4;
+  }
+
+  .line {
+    fill: none;
+    stroke: #c51b8a;
+    stroke-width: 2px;
+  }
+
+
+  .trainingPoint {
+  }
+
+  .sdArea {
+
+  }
+
+  .inactive {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-dasharray: 2;
+    stroke-width: 2px;
+  }
+
+  .active {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-width: 2px;
+  }
+</style>
+
+
+<script>
+  import * as d3 from 'd3';
+  import {Context} from './util/context';
+  import * as gp from '../gp';
+  import KernelCovMat from './KernelCovMat.html';
+
+  export default {
+    components: { KernelCovMat },
+    helpers: {
+      toV(context, y) {
+        return context.v(y);
+      },
+      toU(context, x) {
+        return context.u(x);
+      }
+    },
+    data() {
+      return {
+        trainingPoints: [],
+        countDimensions: 75,
+        context: new Context(500, 300, [-5, 5], [-10, 10]),
+        curves: [],
+        circleSize: 3,
+        kernels: [{
+          kernel:gp.rbf,
+          name: 'RBF',
+          active: true,
+          params: [{
+            name: 'Variance σ',
+            value: 1,
+            min: 0,
+            max: 1,
+          }, {
+            name: 'Length l',
+            value: 1,
+            min: 0,
+            max: 1,
+          }]
+        },{
+          name: 'Periodic',
+          kernel: gp.periodic,
+          active: false,
+          params: [{
+            name: 'Variance σ',
+            value: 1,
+            min: 0,
+            max: 1,
+          }, {
+            name: 'Length l',
+            value: 3,
+            min: 0,
+            max: 1,
+          }, {
+            name: 'P',
+            value: 0.8,
+            min: 0,
+            max: 1,
+          }]
+        },{
+          name: 'Linear',
+          kernel: gp.linear,
+          active: false,
+          params: [{
+            name: 'Variance σ',
+            value: 0.3,
+            min: 0,
+            max: 1,
+          }, {
+            name: 'Sigma_b',
+            value: 0.5,
+            min: 0,
+            max: 1,
+          }, {
+            name: 'Offset c',
+            value: 0,
+            min: -1,
+            max: 1,
+          }]
+        }],
+        useTrainingData : false,
+        currentKernel: gp.rbf,
+        currentParams: [],
+        countSamples: 3,
+        meanCurve: [],
+        firstClick: true
+
+      };
+    },
+
+    computed: {
+      line: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1]));
+      },
+      zero: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1]));
+      },
+      sdPlus: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1] + 2*d[2]));
+      },
+      sdMinus: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1] - 2*d[2]));
+      },
+      sdArea: ({ context }) => { return d3.area()
+        .x(d => context.u(d[0]))
+        .y0(d => context.v(d[1] - 2*d[2]))
+        .y1(d => context.v(d[1] + 2*d[2]));
+      },
+    },
+
+    methods: {
+      createTrainingSet() {
+        // Create test values
+        const xTrain = [0.7238, -0.3105, 0.3172, -3.0417, 2];
+        const isActive = [true, true, true, true, true];
+        const yTrain = xTrain.map(x => Math.sin(6 * x) + 2 * x);
+        const result = xTrain.map((_d, i) => ({
+          x: xTrain[i],
+          y: yTrain[i],
+          active:isActive[i]
+        }));
+        this.set({ trainingPoints:result });
+      },
+      fkt() {
+        let solution = 1;
+        const rbf = gp.rbf();
+        const periodic = gp.periodic(1, 3, 0.8);
+        const linear = gp.linear(0.3, 0.5, 0);
+        const paramsList = [];
+        const {kernels} = this.get();
+        if (kernels[0].active) {
+          solution = rbf;
+          paramsList[0] = kernels[0];
+        }
+        if (kernels[1].active) {
+          solution = periodic;
+          paramsList[0] = kernels[1];
+        }
+        if (kernels[2].active) {
+          solution = linear;
+          paramsList[0] = kernels[2];
+        }
+        if (kernels[0].active && kernels[1].active) {
+          solution = gp.combineKernels([rbf, periodic]);
+          paramsList[0] = kernels[0];
+          paramsList[1] = kernels[1];
+        }
+        if (kernels[1].active && kernels[2].active) {
+          solution = gp.combineKernels([linear, periodic]);
+          paramsList[0] = kernels[1];
+          paramsList[1] = kernels[2];
+        }
+        if (kernels[0].active && kernels[2].active) {
+          solution = gp.combineKernels([linear, rbf]);
+          paramsList[0] = kernels[0];
+          paramsList[1] = kernels[2];
+        }
+        if (kernels[0].active && kernels[1].active && kernels[2].active) {
+          solution = gp.combineKernels([linear, periodic, rbf]);
+          paramsList[0] = kernels[0];
+          paramsList[1] = kernels[1];
+          paramsList[2] = kernels[2];
+        }
+        this.set({currentParams: paramsList});
+        return solution;
+      },
+      resample(idx) {
+        const {context, trainingPoints} = this.get();
+        const {countDimensions, currentKernel, curves} = this.get();
+
+        // creates linear spaced values
+        const N = countDimensions;
+        const [xmin, xmax] = context.xDomain();
+        const step = (xmax - xmin) / (N - 1);
+        const xs = d3.range(xmin, xmax + step, step);
+
+        // prepare training data
+        const activePoints = trainingPoints.filter(p => p.active);
+        const xsTrain = activePoints.map(p => p.x);
+        const ysTrain = activePoints.map(p => p.y);
+
+        const process = gp.gaussianProcess(currentKernel, xs, xsTrain, ysTrain);
+        const ys = process.sample();
+        const ysMean = process.getMean();
+        const sd = process.getSd();
+
+        this.refs.covMat.externalCov(process.cov);
+        this.refs.covMat.set({covMatrix: process.cov, kernel:currentKernel});
+
+        const pts = d3.zip(xs, ys, sd);
+        const ptsMean = d3.zip(xs, ysMean, sd);
+
+        curves[idx] = pts;
+        this.set({curves: curves, meanCurve: ptsMean});
+      },
+      toggle(idx) {
+        const { trainingPoints } = this.get();
+        trainingPoints[idx].active = !trainingPoints[idx].active;
+        this.set({trainingPoints});
+      },
+      setFirstClick(set) {
+        this.set({firstClick: set});
+      }
+    },
+
+    onupdate({ _changed, current, _previous }) {
+      const result = this.fkt();
+      current.currentKernel = result;
+      const svg = d3.select(this.refs.graph);
+      if(result != 1) {
+        this.set({currentKernel: result});
+        const {shouldResample} = this.refs.covMat.get();
+        const {countSamples} = this.get();
+
+        if (shouldResample) {
+          for (let i = 0; i < countSamples; i++) {
+            this.resample(i);
+          }
+        }
+        const {meanCurve} = this.get();
+
+        svg.select('.zero').transition().duration(750).attr('d', current.zero(meanCurve)).style('opacity', 1);
+        svg.select('.sdArea').transition().duration(750).attr('d', current.sdArea(meanCurve)).style('opacity', 1);
+        svg.select('.sdPlus').transition().duration(750).attr('d', current.sdPlus(meanCurve)).style('opacity', 1);
+        svg.select('.sdMinus').transition().duration(750).attr('d', current.sdMinus(meanCurve)).style('opacity', 1);
+
+        svg.selectAll('.curve').data(current.curves).transition().duration(750).attr('d', current.line).style('opacity', 1);
+      } else {
+        svg.select('.zero').transition().duration(750).style('opacity', 0);
+        svg.select('.sdArea').transition().duration(750).style('opacity', 0);
+        svg.select('.sdPlus').transition().duration(750).style('opacity', 0);
+        svg.select('.sdMinus').transition().duration(750).style('opacity', 0);
+
+        svg.selectAll('.curve').transition().duration(750).style('opacity', 0);
+      }
+    },
+
+    oncreate() {
+      const result = this.fkt();
+      this.set({currentKernel:result});
+      this.createTrainingSet();
+      const {meanCurve, sdPlus, sdMinus, sdArea, zero, curves, line} = this.get();
+      const svg = d3.select(this.refs.graph);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'sdArea')
+        .attr('stroke', 'none')
+        .attr('fill', 'rgba(255,224,255,0.6)')
+        .attr('d', sdArea);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'zero')
+        .attr('fill', 'none')
+        .attr('stroke', '#c51b8a')
+        .attr('stroke-width', '2px')
+        .attr('d', zero);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'sdPlus')
+        .attr('fill', 'none')
+        .attr('stroke', '#fa9fb5')
+        .attr('stroke-width', '1px')
+        .attr('d', sdPlus);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'sdMinus')
+        .attr('fill', 'none')
+        .attr('stroke', '#fa9fb5')
+        .attr('stroke-width', '1px')
+        .attr('d', sdMinus);
+
+      svg.selectAll('.curve').data(curves)
+        .enter()
+        .append('path')
+        .attr('class', 'curve')
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(0,0,0,0.2)')
+        .attr('stroke-width', '2px')
+        .attr('d', line);
+    },
+
+  };
+</script>

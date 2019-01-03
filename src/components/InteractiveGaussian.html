@@ -1,0 +1,86 @@
+<svg width="{context.width}" height="{context.height}">
+  <GaussianContours width="{context.width}" height="{context.height}" context="{context}" gaussian="{gaussian}" />
+  <line class="link" x1="{covPos[0]}" y1="{covPos[1]}" x2="{meanPos[0]}" y2="{meanPos[1]}" />
+  <line class="link" x1="{sigma1Pos[0]}" y1="{sigma1Pos[1]}" x2="{meanPos[0]}" y2="{meanPos[1]}" />
+  <line class="link" x1="{sigma2Pos[0]}" y1="{sigma2Pos[1]}" x2="{meanPos[0]}" y2="{meanPos[1]}" />
+  <circle class="handle" ref:sigma1 cx="{sigma1Pos[0]}" cy="{sigma1Pos[1]}" r="4"/>
+  <circle class="handle" ref:sigma2 cx="{sigma2Pos[0]}" cy="{sigma2Pos[1]}" r="4"/>
+  <circle class="handle" ref:cov cx="{covPos[0]}" cy="{covPos[1]}" r="4"/>
+</svg>
+
+<style>
+  .handle {
+    fill: rgba(0,0,0,0.2);
+  }
+
+  .handle:hover {
+    stroke: gray;
+    stroke-width: 2px;
+  }
+
+  /* FIXME: Fix pointer problems */
+  .link {
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 2px;
+  }
+</style>
+
+<script>
+  import GaussianContours from './GaussianContours.html';
+  import * as gauss from '../gaussian';
+  import * as d3 from 'd3';
+  import {Context} from './util/context';
+  import {clamp} from './util/limit';
+
+  export default {
+    components: { GaussianContours },
+    data() {
+      return {
+        limits: {
+          sigma1: {from: 0.6, to: 1.8},
+          sigma2: {from: 0.6, to: 1.8},
+          cov: {from: -0.8, to: 0.8}
+        },
+        mean: [0, 0],
+        sigma1: 1,
+        sigma2: 1,
+        cov: 0.9,
+        context: new Context(300, 300, [-2, 2], [-2, 2]),
+      };
+    },
+    computed: {
+      meanPos: ({ context, mean }) => [context.u(mean[0]), context.v(mean[1])],
+      sigma1Pos: ({ context, mean, sigma1 }) => [context.u(sigma1 + mean[0]), context.v(mean[1])],
+      sigma2Pos: ({ context, mean, sigma2 }) => [context.u(mean[0]), context.v(sigma2 + mean[1])],
+      covPos: ({ context, mean, cov }) => [context.u(mean[0]), context.v(mean[1] - cov)],
+      gaussian: ({ mean, sigma1, sigma2, cov }) => {
+        return new gauss.Gaussian([mean[0],mean[1]], [[sigma1,cov],[cov,sigma2]]);
+      }
+    },
+    oncreate() {
+      // TODO: Limit movement
+      const { context, limits } = this.get();
+      d3.select(this.refs.sigma1).call(d3.drag()
+        .on('drag', () => {
+          let { sigma1 } = this.get();
+          sigma1 = clamp(context.x(d3.event.x), limits.sigma1.from, limits.sigma1.to);
+          this.set({ sigma1 });
+        }));
+
+      d3.select(this.refs.sigma2).call(d3.drag()
+        .on('drag', () => {
+          let { sigma2 } = this.get();
+          sigma2 = clamp(context.y(d3.event.y), limits.sigma2.from, limits.sigma2.to);
+          this.set({ sigma2 });
+        }));
+
+      d3.select(this.refs.cov).call(d3.drag()
+        .on('drag', () => {
+          let { cov } = this.get();
+          // TODO: Make more intuitive
+          cov = clamp(-context.y(d3.event.y), limits.cov.from, limits.cov.to);
+          this.set({ cov });
+        }));
+    }
+  };
+</script>

@@ -1,0 +1,569 @@
+<div class="figure" xmlns:ref="http://www.w3.org/1999/xhtml">
+  <div ref:grid class="kernel-grid">
+    <div class="grid-item">
+      <!--<svg width="{context.width}" height="{context.height*2}">-->
+      <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}" on:click="resample(0)">
+        <g ref:graph>
+          <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
+          <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}"></line>
+          <!--<line ref:mean x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}" />-->
+          <!--<text x="{context.width - 14}" y="{toV(context, 0)-5}" class="annotation">μ</text>-->
+          <!--<line class="sdLine" x1="0" y1="{toV(context, 2)}" x2="{context.width}" y2="{toV(context, 2)}"/>-->
+          <!--<text x="{context.width - 42}" y="{toV(context, 2)-5}" class="annotation">μ + 2σ</text>-->
+          <!--<line class="sdLine" x1="0" y1="{toV(context, -2)}" x2="{context.width}" y2="{toV(context, -2)}"/>-->
+          <!--<text x="{context.width - 42}" y="{toV(context, -2)-5}" class="annotation">μ - 2σ</text>-->
+        </g>
+        <g>
+          {#each trainingPoints as pt, idx}
+          {#if pt.active}
+          <circle cx="{toU(context, pt.x)}" cy="{toV(context, pt.y)}" r="3"
+                  fill="rgba(0,0,0,0.6)"/>
+          {/if}
+          <circle on:click="toggle(idx)" class="trainingPoint {pt.active ? 'active' : 'inactive'}"
+                  cx="{toU(context, pt.x)}" cy="{toV(context, pt.y)}" r="6"/>
+          {/each}
+        </g>
+        <text x={5} y={context.height-5} class="annotation">
+          <tspan fill="rgb(245, 181, 62)" font-style="italic">(click to resample)</tspan>
+        </text>
+      </svg>
+      <!--</svg>-->
+    </div>
+    <div class="grid-item">
+      <KernelCovMat ref:covMat external={true} interaction={true} gridSize={6} offset={0} slider={false}
+                    n={countDimensions}
+                    width={300} height={300}/>
+    </div>
+  </div>
+  <div ref:annotations>
+    <svg ref:covScale width="{context.width}" height=50 style="overflow: visible"></svg>
+  </div>
+</div>
+
+<style>
+  ref:annotations {
+    position: absolute;
+    pointer-events: none;
+    margin: 1em;
+    top: 0px;
+    left: 0px;
+  }
+
+  .kernel-grid {
+    display: inline-grid;
+    grid-template-columns: auto auto auto;
+  }
+
+  .kernel-grid {
+    display: inline-grid;
+    grid-template-columns: auto auto auto;
+  }
+
+  .grid-item {
+    margin: 1em;
+  }
+
+  /*ref:mean {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.2);
+    stroke-width: 2px;
+  }*/
+
+  ref:zero {
+    stroke: rgba(0, 0, 0, 0.2);
+    stroke-width: 1px;
+  }
+
+  .sdLine {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.2);
+    stroke-width: 2px;
+    stroke-dasharray: 4;
+  }
+
+  .line {
+    fill: none;
+    stroke: #c51b8a;
+    stroke-width: 2px;
+  }
+
+  .trainingPoint {
+  }
+
+  .samples {
+    stroke: black;
+    stroke-width: 1px;
+    stroke-opacity: 0;
+  }
+
+
+  .sdArea {
+
+  }
+
+  .inactive {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-dasharray: 2;
+    stroke-width: 2px;
+  }
+
+  .active {
+    fill: transparent;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-width: 2px;
+  }
+</style>
+
+
+<script>
+  import * as d3 from 'd3';
+  import {Context} from './util/context';
+  import * as gp from '../gp';
+  import KernelCovMat from './KernelCovMat.html';
+
+  export default {
+    components: {KernelCovMat},
+    data() {
+      return {
+        trainingPoints: [
+          {x: -1.122, y: -1, active: false},
+          {x: 1.122, y: 1, active: false}
+        ],
+        context: new Context(500, 300, [-5, 5], [-10, 10]),
+        curves: [],
+        meanCurve: [],
+        circleSize: 0,
+        countDimensions: 50,
+        countSamples: 1
+
+      };
+    },
+
+    computed: {
+      connectedline: ({_context}) => {
+        return d3.line()
+          .curve(d3.curveStepBefore)
+          .x(d => d[0])
+          .y(d => d[1]);
+      },
+      line: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1]));
+      },
+      zero: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1]));
+      },
+      sdPlus: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1] + 2 * d[2]));
+      },
+      sdMinus: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1] - 2 * d[2]));
+      },
+      sdArea: ({context}) => {
+        return d3.area()
+          .x(d => context.u(d[0]))
+          .y0(d => context.v(d[1] - 2 * d[2]))
+          .y1(d => context.v(d[1] + 2 * d[2]));
+      }
+    },
+
+    methods: {
+      colorBar() {
+        const svg = d3.select(this.refs.covScale);
+        const currentComponent = this.refs.covMat;
+        const {colorsRow} = currentComponent.get();
+        const {countDimensions} = this.get();
+        const rects = svg.selectAll('.rects');
+        let colorArray = [];
+        if (colorsRow.length > 1) {
+          rects.style('stroke-width', '1px')
+            .style('stroke', 'black')
+            .each(function (_d, i) {
+              const cov = colorsRow[i];
+              const newColor = currentComponent.returnColor(cov.cov);
+              colorArray.push(newColor);
+            })
+          ;
+
+
+        } else {
+          rects.style('stroke-width', '0px')
+            .style('stroke', '#9A8B7A');
+          colorArray = Array(countDimensions).fill('rgba(0,0,0,0.2)');
+        }
+        return colorArray;
+      },
+      colorGradient(colorArray, colorsRow) {
+        const {countDimensions} = this.get();
+        const svg = d3.select(this.refs.covScale);
+        const gradient = svg.selectAll('.gradient > stop');
+        const gradient2 = svg.selectAll('.gradientBackground > stop');
+
+        if (colorsRow.length > 0) {
+          gradient
+            .attr('offset', function (_d, i) {
+              return 100 / countDimensions * i + '%';
+            })
+            .attr('stop-color', function (_d, i) {
+              return colorArray[i];
+            })
+            .attr('stop-opacity', 1);
+
+          gradient2
+            .attr('offset', function (_d, i) {
+              return 100 / countDimensions * i + '%';
+            })
+            .attr('stop-opacity', function (_d, i) {
+              return (colorsRow[i].cov * 2);
+            });
+        } else {
+          gradient
+            .attr('stop-opacity', 0);
+          gradient2
+            .attr('stop-opacity', 1);
+        }
+
+      },
+      resampleFake() {
+        const {curves} = this.get();
+        this.set({curves: curves});
+      },
+      resample(idx) {
+        const {context, trainingPoints, countDimensions} = this.get();
+        const {curves} = this.get();
+
+        // creates linear spaced values
+        const N = countDimensions;
+        const [xmin, xmax] = context.xDomain();
+        const step = (xmax - xmin) / (N - 1);
+        const xs = d3.range(xmin, xmax + step, step);
+
+
+        // prepare training data
+        const activePoints = trainingPoints.filter(p => p.active);
+        const xsTrain = activePoints.map(p => p.x);
+        const ysTrain = activePoints.map(p => p.y);
+
+        const {params, kernel, covMatrix} = this.refs.covMat.get();
+        const paramValues = params.map(p => p.value);
+        const fn = kernel.apply(null, paramValues);
+
+        const process = gp.gaussianProcess(fn, xs, xsTrain, ysTrain);
+        const ys = process.sample();
+        const sd = process.getSd();
+        const ysMean = process.getMean();
+
+        this.refs.covMat.externalCov(process.cov);
+        this.refs.covMat.set({covMatrix: covMatrix});
+
+        const pts = d3.zip(xs, ys, sd);
+        const ptsMean = d3.zip(xs, ysMean, sd);
+
+        curves[idx] = pts;
+        this.set({curves: curves, meanCurve: ptsMean});
+      },
+      toggle(idx) {
+        const {trainingPoints} = this.get();
+        trainingPoints[idx].active = !trainingPoints[idx].active;
+        this.set({trainingPoints});
+        this.refs.covMat.set({shouldResample: true});
+      },
+      createVis() {
+        const {meanCurve, sdPlus, sdMinus, sdArea, zero, curves, line, context, connectedline, countDimensions, circleSize} = this.get();
+        const svg = d3.select(this.refs.graph);
+        const matScale = d3.select(this.refs.covScale);
+
+
+        svg.append('path').data([meanCurve])
+          .attr('class', 'sdArea')
+          .attr('stroke', 'none')
+          .attr('fill', 'rgba(255,224,255,0.6)')
+          .style('fill', 'url(#masterBackground)')
+          .style('opacity', 0.5)
+          .attr('d', sdArea);
+
+        svg.append('path').data([meanCurve])
+          .attr('class', 'zero')
+          .attr('fill', 'none')
+          .attr('stroke', '#c51b8a')
+          .attr('stroke-width', '2px')
+          .attr('d', zero);
+
+        svg.append('path').data([meanCurve])
+          .attr('class', 'sdPlus')
+          .attr('fill', 'none')
+          .attr('stroke', '#fa9fb5')
+          .attr('stroke-width', '1px')
+          .attr('d', sdPlus);
+
+        svg.append('path').data([meanCurve])
+          .attr('class', 'sdMinus')
+          .attr('fill', 'none')
+          .attr('stroke', '#fa9fb5')
+          .attr('stroke-width', '1px')
+          .attr('d', sdMinus);
+
+        ////Circles
+        // Data Join
+        const circles = svg.selectAll('g.circles')
+          .data(curves);
+        //Exit
+        circles.exit().remove();
+        //Enter
+        circles.enter().append('g')
+          .classed('circles', true)
+          .selectAll('.samples')
+          .data(function (d) {
+            return d;
+          })
+          .enter()// d is matrix[i]
+          .append('circle')
+          .classed('samples', true)
+          .attr('cx', d => context.u(d[0]))
+          .attr('cy', d => context.v(d[1]))
+          .attr('r', circleSize)
+          .style('fill', 'none')
+          .style('stroke', 'black')
+          .style('stroke-with', 1);
+
+
+        ////Lines
+        // Data Join
+
+        const lineConnectors = matScale.selectAll('g.lineConnectors')
+          .data([meanCurve]);
+
+        //Exit
+        lineConnectors.exit().remove();
+
+        //Enter
+        matScale
+          .selectAll('.lineConnector')
+          .data(meanCurve)
+          .enter()// d is matrix[i]
+          .append('path')
+          .classed('lineConnector', true)
+          .attr('stroke', 'black')
+          .attr('fill', 'transparent')
+          .style('stroke-width', '1px')
+          .style('stroke-dasharray', 4)
+          .attr('d', function (d) {
+            const xConv = context.u(d[0]);
+            const yConv = context.v(d[1] + 2 * d[2]);
+            return connectedline([[xConv + 1, yConv], [xConv + 1, 12], [xConv + context.width, 12], [xConv + context.width, 10]]);
+          });
+
+        ////Gradient
+        const gradient = matScale.append('linearGradient')
+          .classed('gradient', true)
+          .attr('x1', '0%')
+          .attr('y1', '0%')
+          .attr('x2', '100%')
+          .attr('y2', '0%')
+          .attr('id', 'master');
+
+        ////Gradient
+        const gradient2 = matScale.append('linearGradient')
+          .classed('gradientBackground', true)
+          .attr('x1', '0%')
+          .attr('y1', '0%')
+          .attr('x2', '100%')
+          .attr('y2', '0%')
+          .attr('id', 'masterBackground');
+
+        let stopId = 0;
+        for (let i = 0; i < countDimensions; i++) {
+          gradient.append('stop')
+            .attr('offset', stopId + '%')
+            .attr('stop-color', 'rgba(0,0,0,0.2)')
+            .attr('stop-opacity', 1);
+          gradient2.append('stop')
+            .attr('offset', stopId + '%')
+            .attr('stop-color', 'rgb(255,224,255)')
+            .attr('stop-opacity', 1);
+          stopId = stopId + 100 / countDimensions * i;
+        }
+
+        matScale.append('rect')
+          .attr('width', context.width)
+          .attr('height', context.width / countDimensions)
+          .attr('x', 1)
+          .attr('y', context.y(0) - 9)
+          .style('fill', 'url(#master)');
+
+        ////Rects
+        // Data Join
+
+        const rects = matScale.selectAll('g.colorRect')
+          .data([curves[0]]);
+
+        //Exit
+        rects.exit().remove();
+
+        //Enter
+        rects.enter().append('g')
+          .classed('colorRect', true)
+          .selectAll('.rects')
+          .data(function (d) {
+            return d;
+          })
+          .enter()// d is matrix[i]
+          .append('rect')
+          .classed('rects', true)
+          .attr('x', d => context.u(d[0]))
+          .attr('y', context.y(0))
+          .attr('width', context.width / countDimensions)
+          .attr('height', context.width / countDimensions)
+          .style('fill', 'transparent')
+          .style('stroke', 'black')
+          .style('stroke-width', '1px')
+          .style('stroke-opacity', 0);
+
+
+
+
+        svg.selectAll('.curve').data(curves)
+          .enter()
+          .append('path')
+          .attr('class', 'curve')
+          .attr('fill', 'none')
+          //          .attr('stroke', 'url(#master)')
+          .attr('stroke', 'rgba(0,0,0,0.2)')
+          .attr('stroke-width', '2px')
+          .attr('d', line);
+      },
+      updateLines() {
+        const {meanCurve, curves, zero, sdArea, sdPlus, sdMinus, line} = this.get();
+        const svg = d3.select(this.refs.graph);
+
+        svg.select('.zero').transition().duration(750).attr('d', zero(meanCurve));
+        svg.select('.sdArea').transition().duration(750).attr('d', sdArea(meanCurve));
+        svg.select('.sdPlus').transition().duration(750).attr('d', sdPlus(meanCurve));
+        svg.select('.sdMinus').transition().duration(750).attr('d', sdMinus(meanCurve));
+
+        svg.selectAll('.curve').data(curves).transition().transition().duration(750).attr('d', line);
+
+      },
+      updateCircles() {
+        const {curves, context} = this.get();
+        const {hoveredRowIdx, colorsRow} = this.refs.covMat.get();
+        const svg = d3.select(this.refs.graph);
+        const circles = svg.selectAll('g.circles')
+          .data(curves);
+        //Update
+        circles.selectAll('.samples')
+          .data(function (d) {
+            return d;
+          })
+          .transition().duration(750)
+          .attr('cx', d => context.u(d[0]))
+          .attr('cy', d => context.v(d[1]))
+          .attr('stroke-opacity', function (_d, i) {
+            if (colorsRow.length > 1) {
+              return colorsRow[i].cov;
+            }
+            else {
+              return 0;
+            }
+          })
+          .attr('stroke-with', function (_d, i) {
+            if (hoveredRowIdx === i) {
+              return '4px';
+            } else {
+              return '1px';
+            }
+          });
+      },
+      updateGradient() {
+        const matScale = d3.select(this.refs.covScale);
+        const {hoveredRowIdx, colorsRow, offset, gridSize} = this.refs.covMat.get();
+        const {meanCurve, context, countDimensions, connectedline} = this.get();
+        const colorArray = this.colorBar();
+
+        matScale
+          .selectAll('.lineConnector')
+          .data(meanCurve)
+          .attr('d', function (d, i) {
+            const xConv = context.u(d[0]);
+            const yConv = context.v(d[1] + 2 * d[2]);
+            const offsetRight = 37 + gridSize / 2 + (gridSize + offset) * i;
+            const offsetLeft = xConv + context.width - (context.width / (countDimensions - 1) * i);
+            return connectedline([[xConv + 1, yConv], [xConv + 1, -16], [offsetLeft + offsetRight, -16], [offsetLeft + offsetRight, (hoveredRowIdx * gridSize)]]);
+          })
+          .style('stroke-dasharray', function (_d, i) {
+            if (hoveredRowIdx === i) {
+              return 'none';
+            } else {
+              return '4';
+            }
+          })
+          .style('stroke-opacity', function (_d, i) {
+            if (colorsRow.length > 1) {
+              if (hoveredRowIdx === i) {
+                return 1;
+              } else {
+                return colorsRow[i].cov;
+              }
+            }
+            else {
+              return 0;
+            }
+          })
+          .style('stroke-width', function (_d, i) {
+            if (hoveredRowIdx === i) {
+              return '2px';
+            } else {
+              return '1px';
+            }
+          })
+        ;
+        this.colorGradient(colorArray, colorsRow);
+      }
+    },
+
+    onupdate({_changed, _current, _previous}) {
+      const {shouldResample} = this.refs.covMat.get();
+      const {countSamples} = this.get();
+
+      const xPosOuter = document.getElementById('Posterior').getBoundingClientRect().x;
+      const xPos = this.refs.grid.getBoundingClientRect().left;
+      this.refs.annotations.style.left = xPos - xPosOuter + 'px';
+
+      if (shouldResample) {
+        for (let i = 0; i < countSamples; i++) {
+          this.resample(i);
+        }
+      }
+
+      this.updateLines();
+      this.updateCircles();
+      this.updateGradient();
+    },
+    oncreate() {
+
+      this.resample(0);
+
+      this.createVis();
+      this.refs.covMat.on('update', () => {
+        this.resampleFake();
+      });
+    },
+
+    helpers: {
+      toV(context, y) {
+        return context.v(y);
+      },
+      toU(context, x) {
+        return context.u(x);
+      }
+    }
+  };
+</script>

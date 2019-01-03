@@ -1,0 +1,184 @@
+<svg ref:svgArea width="{context.width}" height="{context.height}">
+  <g ref:graph>
+    <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
+    <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}"> 
+  </g>
+  <g>
+    {#each trainingPoints as pt, idx}
+      {#if pt.active}
+        <circle cx="{toU(context, pt.x)}" cy="{toV(context, pt.y)}" r="3" fill="rgba(0,0,0,0.6)" />
+      {/if}
+      <circle on:click="toggle(idx)" class="trainingPoint {pt.active ? 'active' : 'inactive'}" cx="{toU(context, pt.x)}" cy="{toV(context, pt.y)}" r="6" /> 
+    {/each}
+  </g>
+  <text x="5" y="10" class="annotation">
+    <tspan font-weight="bold">Regression</tspan> is used to find a function <tspan fill="#c51b8a">(line)</tspan>
+    <tspan x="5" dy="1.5em">that represents a set of data points as closely</tspan>
+    <tspan x="5" dy="1.5em">as possible</tspan>
+  </text>
+  <text x="450" y="300" class="annotation">
+    A <tspan font-weight="bold">Gaussian process</tspan> is a probabilistic
+    <tspan x="450" dy="1.5em">method that gives a confidence</tspan>
+    <tspan x="450" dy="1.5em"><tspan fill="#fa9fb5">(shaded)</tspan> for the predicted function</tspan>
+  </text>
+  {#if firstClick}
+  <text x="{toU(context, trainingPoints[1].x)-50}" y="{toV(context, trainingPoints[1].y)+23}" class="annotation">
+    <tspan fill="rgb(245, 181, 62)" font-style="italic">(click to enable)</tspan>
+  </text>
+  {/if}
+</svg>
+
+<style>
+  ref:zero {
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 1px;
+  }
+
+  .sdLine {
+    fill: none;
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 2px;
+    stroke-dasharray: 4;
+  }
+
+  .line {
+    fill: none;
+    stroke: #c51b8a;
+    stroke-width: 2px;
+  }
+
+  .trainingPoint {
+  }
+
+  .inactive {
+    fill: transparent;
+    stroke: rgba(0,0,0,0.4);
+    stroke-dasharray: 2;
+    stroke-width: 2px;
+  }
+
+  .active {
+    fill: transparent;
+    stroke: rgba(0,0,0,0.4);
+    stroke-width: 2px;
+  }
+</style>
+
+<script>
+  import * as d3 from 'd3'; 
+  import {Context} from './util/context';
+  import * as gp from '../gp';
+
+  export default {
+
+    data() {
+      return {
+        trainingPoints: [
+          {x: -4.5, y: -4, active: true},
+          {x: -2, y: -7, active: false},
+          {x: -1, y: -1, active: false},
+          {x: 1, y: 4, active: false},
+          {x: 3, y: 7, active: true}
+        ],
+        context: new Context(700, 400, [-5, 5], [-10, 10]),
+        firstClick: true,
+      };
+    },
+
+    computed: {
+      mean: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1]));
+      },
+      sdPlus: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1] + 2*d[2]));
+      },
+      sdMinus: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1] - 2*d[2]));
+      },
+      sdArea: ({ context }) => { return d3.area()
+        .x(d => context.u(d[0]))
+        .y0(d => context.v(d[1] - 2*d[2]))
+        .y1(d => context.v(d[1] + 2*d[2]));
+      },
+      curve: ({ context, trainingPoints }) => {
+        const N = 75;
+        const [xmin, xmax] = context.xDomain();
+        const step = (xmax - xmin) / N;
+        const xs = d3.range(xmin, xmax + step, step);
+
+        // prepare training data
+        const activePoints = trainingPoints.filter(p => p.active);
+        const xsTrain = activePoints.map(p => p.x);
+        const ysTrain = activePoints.map(p => p.y);
+
+        const process = gp.gaussianProcess(gp.rbf(), xs, xsTrain, ysTrain);
+        //const ys = process.sample().reduce((a, b) => a.concat(b));
+        const ys = process.getMean();
+        const sd = process.getSd();
+
+        return d3.zip(xs,ys,sd);
+      }
+    },
+
+    methods: {
+      toggle(idx) {
+        const { trainingPoints } = this.get();
+        let { firstClick } = this.get();
+        trainingPoints[idx].active = !trainingPoints[idx].active;
+        firstClick = false;
+        this.set({ trainingPoints, firstClick });
+      }
+    },
+
+    onstate({ _changed, current, _previous }) {
+      const svg = d3.select(this.refs.graph).transition();
+      svg.select('.sdArea').duration(750).attr('d', current.sdArea(current.curve));
+      svg.select('.curve').duration(750).attr('d', current.mean(current.curve));
+      svg.select('.sdPlus').duration(750).attr('d', current.sdPlus(current.curve));
+      svg.select('.sdMinus').duration(750).attr('d', current.sdMinus(current.curve));
+    },
+
+    oncreate() {
+      const { curve, mean, sdPlus, sdMinus, sdArea } = this.get();
+      const svg = d3.select(this.refs.graph);
+      svg.append('path').data([curve])
+        .attr('class', 'sdArea') 
+        .attr('stroke', 'none')
+        .attr('fill', 'rgba(253,224,221,0.6')
+        .attr('d', sdArea);
+
+      svg.append('path').data([curve])
+        .attr('class', 'curve') 
+        .attr('fill', 'none')
+        .attr('stroke', '#c51b8a')
+        .attr('stroke-width', '2px')
+        .attr('d', mean);
+
+      svg.append('path').data([curve])
+        .attr('class', 'sdPlus') 
+        .attr('fill', 'none')
+        .attr('stroke', '#fa9fb5')
+        .attr('stroke-width', '1px')
+        .attr('d', sdPlus);
+
+      svg.append('path').data([curve])
+        .attr('class', 'sdMinus') 
+        .attr('fill', 'none')
+        .attr('stroke', '#fa9fb5')
+        .attr('stroke-width', '1px')
+        .attr('d', sdMinus);
+    },
+
+    helpers: {
+      toV(context, y) {
+        return context.v(y);
+      },
+      toU(context, x) {
+        return context.u(x);
+      }
+    }
+  };
+</script>

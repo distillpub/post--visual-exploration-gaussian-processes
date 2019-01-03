@@ -1,0 +1,106 @@
+<svg width="700" height="280">
+  <g transform="translate(1,1)">
+    <rect x="0" y="0" width="200" height="150" fill="rgb(252, 252, 252)" stroke="rgba(0, 0, 0, 0.1)" />
+    {#each xs as x}
+    {#if x == 4}
+    <text x="{20*x+6}" y="90" class="annotation"><tspan font-weight="bold">f(x) = ?</tspan></text>
+    <line class="dashed" x1="{20*x+(bs/2)+6}" y1="158" x2="{20*x+(bs/2)+6}" y2="95" stroke="grey"/>
+    {/if}
+    <rect x="{20*x+6}" y="158" width="{bs}" height="{bs}" fill="{idxColor(x)}" />
+    {/each}
+
+    <line class="dashed" x1="{20*2+6+10+bs/2}" y1="158" x2="{20*2+6+10+bs/2}" y2="50" />
+    <rect x="{20*2+6+10}" y="158" width="{bs}" height="{bs}" fill="rgb(245, 181, 62)" />
+    <circle cx="{20*2+6+10+bs/2}" cy="50" r="{bs/2}" fill="rgb(245, 181, 62)" />
+
+    <line class="dashed" x1="{20*7+6+10+bs/2}" y1="158" x2="{20*7+6+10+bs/2}" y2="40" />
+    <rect x="{20*7+6+10}" y="158" width="{bs}" height="{bs}" fill="rgb(245, 181, 62)" />
+    <circle cx="{20*7+6+10+bs/2}" cy="40" r="{bs/2}" fill="rgb(245, 181, 62)" />
+
+    <text x="0" y="195" class="annotation">
+    Adding training points (<tspan fill="rgb(245, 181, 62)">■</tspan>) changes
+    <tspan x="0" dy="1.5em">the number of dimensions of the</tspan>
+    <tspan x="0" dy="1.5em">multivariate Guassian distribution.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(260,0)">
+    <text x="0" y="9" class="annotation"><tspan font-weight="bold">Covariance matrix</tspan></text>
+    <g transform="translate(0,20)">
+      <line class="dashed" x1="{12*1+12+bs/2}" y1="{bs/2}" x2="{12*1+12+bs/2}" y2="{12*5+12+bs/2}" />
+      <line class="dashed" y1="{12*5+12+bs/2}" x1="{bs/2}" y2="{12*5+12+bs/2}" x2="{12*1+12+bs/2}" />
+      <g transform="translate(34,80)">
+        <text x="0" y="0" class="annotation">= k(<tspan fill="{idxColor(5-2)}">■</tspan>,<tspan fill="rgb(245, 181, 62)">■</tspan>)</text>
+      </g>
+      <text x="114" y="147" class="annotation">12x12</text>
+      <rect x="12" y="12" width="140" height="140" stroke="black" fill="transparent" />
+      {#each xst as x}
+      {#if x < 2}
+      <rect x="{12*x+12}" y="0" width="{bs}" height="{bs}" fill="rgb(245, 181, 62)" />
+      <rect x="0" y="{12*x+12}" width="{bs}" height="{bs}" fill="rgb(245, 181, 62)" />
+      {:else}
+      <rect x="{12*x+12}" y="0" width="{bs}" height="{bs}" fill="{idxColor(x-2)}" />
+      <rect x="0" y="{12*x+12}" width="{bs}" height="{bs}" fill="{idxColor(x-2)}" />
+      {/if}
+      {/each}
+      <rect x="{12*1+12}" y="{12*5+12}" width="{bs}" height="{bs}" fill="grey" />
+    </g>
+    <text x="0" y="195" class="annotation">
+    The covariance matrix is
+    <tspan x="0" dy="1.5em">created by pairwise evaluation</tspan>
+    <tspan x="0" dy="1.5em">of the kernel function resulting</tspan>
+    <tspan x="0" dy="1.5em">in a 12-dimensional distribution.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(490,0)">
+    <text x="0" y="9" class="annotation"><tspan font-weight="bold">Covariance matrix</tspan></text>
+    <g transform="translate(0,20)">
+      <text x="30" y="42" class="annotation"><tspan fill="rgb(245, 181, 62)">conditioning</tspan></text>
+      <image x="20" y="27" width="100" height="100" xlink:href="images/process.svg" />
+      <text x="90" y="123" class="annotation">10x10</text>
+      <rect x="12" y="12" width="116" height="116" stroke="black" fill="transparent" />
+      {#each xs as x}
+      <rect x="{12*x+12}" y="0" width="{bs}" height="{bs}" fill="{idxColor(x)}" />
+      <rect x="0" y="{12*x+12}" width="{bs}" height="{bs}" fill="{idxColor(x)}" />
+      {/each}
+    </g>
+    <text x="0" y="195" class="annotation">
+    Through <tspan font-weight="bold">conditioning</tspan> we obtain
+    <tspan x="0" dy="1.5em">the distribution that describes</tspan>
+    <tspan x="0" dy="1.5em">the prediction of the function</tspan>
+    <tspan x="0" dy="1.5em">values for the given <tspan font-style="italic">x</tspan> values.</tspan>
+    </text>
+  </g>
+</svg>
+
+<style>
+
+  .dashed {
+    stroke: rgba(0,0,0,0.4);
+    stroke-dasharray: 4;
+  }
+
+</style>
+
+<script>
+  import * as d3 from 'd3';
+
+  const color = d3.scaleSequential(d3.interpolateRdPu).domain([-1,10]);
+
+  export default {
+    data() {
+      return {
+        bs: 8,
+        xs: d3.range(0,10),
+        xst: d3.range(0,12),
+      };
+    },
+
+    helpers: {
+      idxColor(idx) {
+        return color(idx);
+      }
+    }
+  };
+</script>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8"/>
+<title>A Visual Exploration of Gaussian Processes</title>
+<script>
+  window.addEventListener('WebComponentsReady', function () {
+    const loaderTag = document.createElement('script');
+    loaderTag.src = 'js/template.v2.js';
+    document.head.insertBefore(loaderTag, document.head.firstChild);
+    const loaderTag2 = document.createElement('script');
+    loaderTag2.src = 'js/bundle.js';
+    document.head.insertBefore(loaderTag2, document.head.firstChild);
+  });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.17/webcomponents-loader.js"></script>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+
+<!-- Google Scholar meta tags -->
+<meta name="citation_title" content="A Visual Exploration of Gaussian Processes">
+<meta name="citation_author" content="Görtler, Jochen">
+<meta name="citation_author" content="Kehlbeck, Rebecca">
+<meta name="citation_author" content="Deussen, Oliver">
+<meta name="citation_publication_date" content="2018/10/22">
+<meta name="citation_online_date" content="2018/09/03">
+<meta name="citation_conference_title" content="Proceedings of the Workshop on Visualization for AI Explainability (VISxAI)">
+<meta name="citation_firstpage" content="1">
+<meta name="citation_keywords" content="visualization, machine learning, explainability, gaussian processes, artificial intelligence, explainable artificial intelligence">
+
+<!-- OG meta tags -->
+<meta property='og:title' content="A Visual Exploration of Gaussian Processes">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.jgoertler.com/visual-exploration-gaussian-processes/">
+<meta property="og:image" content="">
+<meta property="og:description" content="How to turn a collection of small building blocks into a versatile tool for solving regression problems.">
+<meta property="og:site_name" content="Jochen Görtler">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2018-12-03">
+<meta property="article:author" content="Görtler, Jochen">
+<meta property="article:author" content="Kehlbeck, Rebecca">
+<meta property="article:author" content="Deussen, Oliver">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-122647105-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-122647105-1');
+</script>
+</head>
+
+<distill-header></distill-header>
+
+<d-front-matter>
+  <script type="text/json">{
+  "title": "A Visual Exploration of Gaussian Processes",
+  "description": "How to turn a collection of small building blocks into a versatile tool for solving regression problems.",
+  "authors": [
+    {
+      "author": "Jochen Görtler",
+      "authorURL": "http://www.jgoertler.com",
+      "affiliation": "University of Konstanz",
+      "affiliationURL": "https://www.cgmi.uni-konstanz.de"
+    },
+    {
+      "author": "Rebecca Kehlbeck",
+      "authorURL": "https://www.cgmi.uni-konstanz.de",
+      "affiliation": "University of Konstanz",
+      "affiliationURL": "https://www.cgmi.uni-konstanz.de"
+    },
+    {
+      "author": "Oliver Deussen",
+      "authorURL": "https://www.cgmi.uni-konstanz.de/en/persons/prof-dr-oliver-deussen/",
+      "affiliation": "University of Konstanz",
+      "affiliationURL": "https://www.cgmi.uni-konstanz.de"
+    }
+  ]
+  }</script>
+</d-front-matter>
+
+<d-title>
+  <h1>A Visual Exploration of Gaussian Processes</h1>
+  <p>How to turn a collection of small building blocks into a versatile tool for solving regression problems.</p>
+  <d-figure id="Teaser" class="l-screen shaded-figure"></d-figure>
+</d-title>
+<d-article>
+    <h3>This article was presented at <a href="http://visxai.io/" target="_blank">VISxAI</a>, it is now under review at <a href="https://distill.pub/" target="_blank">distill.pub</a>.</h3>
+    <h2>Introduction</h2>
+  <p>Even if you have spent some time reading about machine learning, chances are that you have never heard of Gaussian
+    processes.
+    And if you have, rehearsing the basics is always a good way to refresh your memory.
+    With this blog post we want to give an introduction to Gaussian processes and make the mathematical intuition behind
+    them more approachable.
+  </p>
+  <p>Gaussian processes are a powerful tool in the machine learning toolbox
+    <d-cite key="Rasmussen2004"></d-cite>
+    . They allow us to make predictions about our data by incorporating prior knowledge.
+    Their most obvious area of application are regression problems, for example in robotics, but they can also be
+    extended to classification and clustering tasks
+    <d-cite key="Kapoor2010, Kim2007"></d-cite>
+    . Just a quick recap: the goal of regression is to find a function that describes a given set of data points as
+    closely as possible. This process is called <i>fitting</i> a function to the data.
+    For a given set of training points, there are potentially infinitely many functions that fit the data. Gaussian
+    processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>. The mean
+    of this probability distribution then represents the most probable characterization of the data. Furthermore,
+    using a probabilistic approach allows us to incorporate the confidence of the prediction into the regression result.
+  </p>
+
+  <p>
+    We will first explore the mathematical foundation they are built on, and you can follow along using interactive
+    figures
+    and hands-on examples.
+    They help to explain the impact of individual components, and show the flexibility of Gaussian processes.
+    After following this article we hope that you will have a visual intuition on how Gaussian processes work and how
+    you can configure them for different types of data.
+
+  </p>
+
+    <h2>Multivariate Gaussian distributions</h2>
+  <p>
+    Before we can explore Gaussian processes, we need to understand the mathematical concepts they are based on. As the
+    name suggests, the Gaussian distribution (which is often also referred to as <i>normal</i> distribution) is the
+    basic building block of Gaussian processes. In particular, we are interested in the multivariate case of this
+    distribution, where each random variable is distributed normally and their joint distribution is also Gaussian. In
+    general, the multivariate Gaussian distribution is defined by a mean vector
+    <d-math>\mu</d-math>
+    and a covariance matrix
+    <d-math>\Sigma</d-math>
+    .
+  </p>
+
+    <p>The mean vector <d-math>\mu</d-math> describes the expected value of the distribution. Each of its components describes the mean of the corresponding dimension. <d-math>\Sigma</d-math> models the variance along each dimension and determines how the different random variables are correlated. The covariance matrix is always symmetric and positive semi-definite<d-cite key="Hazewinkel1994"></d-cite>. The diagonal of <d-math>\Sigma</d-math> consists of the standard deviation <d-math>\sigma_i</d-math> of the <d-math>i</d-math>-th random variable, whereas the off-diagonal elements describe correlations between each of the components <d-math>\sigma_{ij}</d-math>.</p>
+
+    <d-math block>
+        X = \begin{bmatrix} X_1 \\ X_2 \\ \vdots \\ X_n \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma)
+    </d-math>
+
+    <p>We say <d-math>X</d-math> follows a normal distribution. The covariance matrix <d-math>\Sigma</d-math> describes the shape of the distribution. It is defined in terms of the expected value <d-math>E</d-math>:</p>
+
+    <d-math block>
+      \Sigma = \text{Cov}(X_i, X_j) = E \left[ (X_i - \mu_i)(X_j - \mu_j)^T \right]
+    </d-math>
+
+    <p>Visually, the distribution is centered arround the mean and the covariance matrix defines its shape. The <a href="#Multivariate">following figure</a> shows the influence of these parameters on a two-dimensional Gaussian distribution. The standard deviations for each random variable are on the diagonal of the covariance matrix, while the other values show the covariance between them.</p>
+
+    <figure>
+    <d-figure id="Multivariate"></d-figure>
+    </figure>
+    
+    <p>Gaussian distributions are widely used to model the real world: either as a surrogate when the original
+    distributions are unknown, or in the context of the <i>central limit theorem</i><d-footnote>One of the implications of this theorem is that a collection of independent, identically distributed
+      random variables with finite variance are together distributed normally. A good introduction to the central limit
+      theorem is given by <a
+        href="https://www.khanacademy.org/math/ap-statistics/sampling-distribution-ap/sampling-distribution-mean/v/central-limit-theorem"
+        target="_blank">this video</a> from <a href="https://www.khanacademy.org" target="_blank">Khan Academy</a>.
+    </d-footnote>.
+    In the next section we will take a closer look at how to manipulate Gaussian distributions and extract useful information from them.
+    </p>
+
+    <h3 id="MargCond">Marginalization and Conditioning</h3>
+  <p>Gaussian distributions have the nice algebraic property of being closed under
+    conditioning and marginalization. This means that the resulting distributions from these operations are also
+    Gaussian, which makes many problems in statistics and machine learning tractable. In the following we will take a
+    closer look at both of these operations, as they are the foundation for Gaussian processes.
+  </p>
+
+    <p><i>Marginalization</i> and <i>conditioning</i> both work on subsets of the original distribution and we will use the following notation:</p>
+
+    <d-math block>\begin{bmatrix} X \\ Y \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma) = \mathcal{N} \left( \begin{bmatrix} \mu_X \\ \mu_Y \end{bmatrix}, \begin{bmatrix} \Sigma_{XX} \, \Sigma_{XY} \\ \Sigma_{YX} \, \Sigma_{YY} \end{bmatrix} \right)</d-math>
+
+    <p>With <d-math>X</d-math> and <d-math>Y</d-math> representing subsets of original random variables.</p>
+
+    <p>Through <i>marginalization</i> we can extract partial information from multivariate probability distributions. In particular, given a normal probability distribution <d-math>P(X,Y)</d-math> over vectors of random variables <d-math>X</d-math>, and <d-math>Y</d-math>, we can determine their marginalized probability distributions in the following way:</p>
+
+    <d-math block>
+      \begin{aligned}
+        X &\sim \mathcal{N}(\mu_X, \Sigma_{XX}) \\
+        Y &\sim \mathcal{N}(\mu_Y, \Sigma_{YY})
+      \end{aligned}
+    </d-math> 
+
+    <p>The interpretation of this equation is straight forward: each partition <d-math>X</d-math> and <d-math>Y</d-math> only depends on its corresponding entries in <d-math>\mu</d-math> and <d-math>\Sigma</d-math>. To marginalize out a random variable from a Gaussian distribution we can simply drop the variables from <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.</p>
+
+    <d-math block>
+        p_X(x) = \int_y p_{X,Y}(x,y)dy = \int_y p_{X|Y}(x|y) p_Y(y) dy
+    </d-math>
+
+  <p>The way to interpret this equation is that if we are interested in the probability of
+    <d-math>X = x</d-math>, we need to consider all possible outcomes of
+    <d-math>Y</d-math> that can jointly lead to the result
+    <d-footnote>The corresponding <a href="https://en.wikipedia.org/wiki/Marginal_distribution" target="_blank">Wikipedia
+      article</a> has a good description of the marginal distribution, including several examples.
+    </d-footnote>
+    .
+  </p>
+
+  <p>
+  Another important operation for Gaussian processes is <i>conditioning</i>.
+  It is used to determine the probability of one variable depending on another variable.
+  Similar to marginalization, this operation is also closed and yields a modified Gaussian distribution.
+  This operation is the cornerstone of Gaussian processes since it allows Bayesian inference, which we will talk about in the <a href="#GaussianProcesses">next section</a>.
+  Conditioning is defined by:
+  </p>
+
+    <d-math block>
+      \begin{aligned}
+      X|Y &\sim \mathcal{N}(\:\mu_X + \Sigma_{XY}\Sigma_{YY}^{-1}(Y - \mu_Y),\: \Sigma_{XX}-\Sigma_{XY}\Sigma_{YY}^{-1}\Sigma_{YX}\:) \\
+      Y|X &\sim \mathcal{N}(\:\mu_Y + \Sigma_{YX}\Sigma_{XX}^{-1}(X - \mu_X),\: \Sigma_{YY}-\Sigma_{YX}\Sigma_{XX}^{-1}\Sigma_{XY}\:) \\
+      \end{aligned}
+    </d-math>
+
+    <p>
+    Note that the new mean only depends on the conditioned variable, while the covariance matrix is independent from this variable.
+    </p>
+
+    <p>
+    Now that we have worked through the necessary equations, we will think about how we can understand the two operations visually.
+    While marginalization and conditioning can be applied to multivariate distributions of many dimensions, it makes sense to consider the two-dimensional case as shown in the <a href="#MarginalizationConditioning">following figure</a>.
+    Marginalization can be seen as integrating along one of the dimensions of the Gaussian distribution, which is in line with the general definition of the marginal distribution.
+    Conditioning also has a nice geometric interpretation &mdash; we can imagine it as making a cut through the multivariate distribution, yielding a new Gaussian distribution with fewer dimensions.
+    </p>
+
+  <figure class="l-middle-outset">
+    <d-figure id="MarginalizationConditioning"></d-figure>
+    <figcaption>
+      A bivariate normal distribution in the center.
+      On the left you can see the result of marginalizing this distribution for Y, akin to integrating along the Y axis. On the right you can see the distribution conditioned on a given X, which is similar to a cut through the original distribution. The Gaussian distribution and the conditioned variable can be changed by dragging the handles.</figcaption>
+    </figure>
+
+    
+    <h2 id="GaussianProcesses">Gaussian Processes</h2>
+    <p>
+      Now that we have recalled some of the basic properties of multivariate Gaussian distributions, we will combine them together to define Gaussian processes, and show how they can be used to tackle regression problems.
+    </p>
+
+    <p>
+      First, we will move from the continuous view to the discrete representation of a function:
+      rather than finding an implicit function, we are interested in predicting the function values at concrete points, which we call <i>test points</i> <d-math>X</d-math>.
+      Respectively, we will denote the <i>training data</i> as <d-math>Y</d-math>.
+      Now, the key idea behind Gaussian processes is that all function values stem from a multivariate Gaussian distribution. 
+      That means that the joint probability distribution <d-math>P(X,Y)</d-math> spans the space of possible function values for the function that we want to predict.
+      And this joint distribution of test and training data has <d-math>|X| + |Y|</d-math> dimensions.
+    </p>
+
+    <p>
+      In order to perform regression on the training data, we will treat this problem as <i>Bayesian inference</i>.
+      The essential idea of Bayesian inference is to update the current hypothesis as new information becomes available. 
+      In the case of Gaussian processes, this information is the training data.
+      Thus, we are interested in the conditional probability <d-math>P(X|Y)</d-math>.  
+      Finally, we recall that Gaussian distributions are closed under conditioning &mdash; so <d-math>P(X|Y)</d-math> is also distributed normally.
+    </p>
+
+    <p>
+      Now that we have the basic framework of Gaussian processes together, there is only one thing missing:
+      how do we set up this distribution and define the mean <d-math>\mu</d-math> and the covariance matrix <d-math>\Sigma</d-math>?
+      For this we will use what is called a <i>kernel</i> <d-math>k</d-math>.
+      We will talk about this in detail in the next section.
+      But before we come to this, let us reflect on how we can use multivariate Gaussian distributions to estimate function values.
+      The <a href="#PriorFigure">following figure</a> shows an example of this using ten test points at which we want to predict our function:
+    </p>
+
+    <figure>
+    <d-figure id="PriorFigure"></d-figure>
+    </figure>
+
+    <p>
+      In Gaussian processes we treat each test point as a random variable. 
+      A multivariate Gaussian distribution has the same number of dimensions as the number of random variables.
+      Since we want to predict the function values at
+      <d-math>|X|=N</d-math>
+      test points, the corresponding multivariate Gaussian distribution is also
+      <d-math>N</d-math>
+      -dimensional.
+      Making a prediction using a Gaussian process ultimately boils down to drawing samples from this distribution. 
+      We then interpret the <d-math>i</d-math>-th component of the resulting vector as the function value corresponding to the <d-math>i</d-math>-th test point.
+    </p>
+
+    <h3>Kernels</h3>
+    <p>
+      Recall that in order to set up our distribution, we need to define <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.
+      In Gaussian processes it is often assumed that <d-math>\mu = 0</d-math>, which simplifies the necessary equations for conditioning.
+      We can always assume such a distribution, even if <d-math>\mu \neq 0</d-math>, and add <d-math>\mu</d-math> back to the resulting function values after the prediction step.
+      So configuring <d-math>\mu</d-math> is straight forward &mdash; it gets more interesting when we look at the other parameter of the distribution.
+    </p>
+
+    <p>
+      The clever step of Gaussian processes is how we set up the covariance matrix <d-math>\Sigma</d-math>.
+      The covariance matrix will not only describe the shape of our distribution, but ultimately determines the characteristics of the function that we want to predict.
+      We generate the covariance matrix by evaluating the kernel <d-math>k</d-math>, which is often also called <i>covariance function</i>, pairwise on all the points.
+      The kernel receives two points <d-math>t,t' \in \mathbb{R}^n</d-math> as an input and returns a similarity measure between those points in the form of a scalar:
+    </p>
+
+    <d-math block>
+      k: \mathbb{R}^n \times \mathbb{R}^n \rightarrow \mathbb{R},\quad 
+      \Sigma = \text{Cov}(X,X') = k(t,t')
+    </d-math>
+
+    <p>
+      We evaluate this function for each pairwise combination of the test points to retrieve the covariance matrix.
+      This step is also depicted in the <a href="#PriorFigure">figure above</a>.
+      In order to get a better intution for the role of the kernel, let's think about what the entries in the covariance matrix describe.
+      The entry <d-math>\Sigma_{ij}</d-math> describes how much influence the <d-math>i</d-math>-th and <d-math>j</d-math>-th point have on each other.
+      This follows from the definition of the multivariate Gaussian distribution, which states that <d-math>\Sigma_{ij}</d-math> defines the correlation between the <d-math>i</d-math>-th and the <d-math>j</d-math>-th random variable.
+      Since the kernel describes the similarity between the values of our function, it controls the possible shape that a fitted function can adopt.
+      Note that when we choose a kernel, we need to make sure that the resulting matrix adheres to the properties of a covariance matrix.
+    </p> 
+
+    <p>
+      Kernels are widely used in machine learning, for example in <i>support vector machines</i><d-cite key="Vapnik2000"></d-cite>.
+      The reason for this is that they allow similarity measures that go far beyond the standard euclidean distance (<d-math>L2</d-math>-distance).
+      Many of these kernels conceptually embed the input points into a higher dimensional space in which they then measure the similarity<d-footnote>If the kernel follows Mercer's theorem it can be used to define a Hilbert space. More information on this can be found on <a href="https://en.wikipedia.org/wiki/Kernel_method">Wikipedia</a>.</d-footnote>.
+      The <a href="#MultipleKernels">following figure</a> shows examples of some common kernels for Gaussian processes.
+      For each kernel, the covariance matrix has been created from <d-math>N=25</d-math> linear spaced values ranging from <d-math>[-5,5]</d-math>. Each entry in the matrix shows the covariance between points in the range of <d-math>[0,1]</d-math>.
+    </p>
+
+  <figure class="l-middle-outset">
+    <d-figure id="MultipleKernels">
+    </d-figure>
+    <figcaption>This figure shows various kernels that can be used with Gaussian processes. Each kernel has different
+      parameters, which can be changed by adjusting the according sliders. When grabbing a slider,
+      information on how the current parameter influences the kernel will be shown on the right.
+    </figcaption>
+    </figure>
+
+  <p> Kernels can be separated into <i>stationary</i> and <i>non-stationary</i> kernels. <i>Stationary</i> kernels, such
+    as the RBF or the periodic kernel, are functions invariant to translations, and the covariance of two points is only
+    dependent on their relative position. <i>Non-stationary</i> kernels, such as the linear kernel, do not have this
+    constraint and depend on an absolute location. The stationary nature of the RBF kernel can be observed in the
+    banding around the diagonal of its covariance matrix (as shown in <a href="#MultipleKernels">this figure</a>). Increasing the length parameter increases the banding, as
+    points further away from each other become more correlated. For the periodic kernel, we have an additional parameter
+    <d-math>P</d-math> that determines the periodicity, which controls the distance between each repetition of the function.
+    In contrast, the parameter <d-math>C</d-math> of the linear kernel allows us to change the point on which all functions hinge.
+  </p>
+
+  <p>
+    There are many more kernels that can describe different classes of functions, which can be used to model the desired shape of the function.
+    A good overview of different kernels is given by Duvenaud<d-cite key="Duvenaud2014"></d-cite>.
+    It is also possible to combine several kernels &mdash; but we will get to this later.
+  </p>
+
+    <h3>Prior Distribution</h3>
+    <p>
+      We will now shift our focus back to the original task of regression.
+      As we have mentioned earlier, Gaussian processes define a probability distribution over possible functions.
+      Because this distribution is a multivariate Gaussian distribution, the distribution of functions is normal.
+      Recall that we usually assume <d-math>\mu=0</d-math>.
+      For now, let's consider the case where we have not yet observed any training data.
+      In the context of Bayesian inference, this is called the <i>prior</i> distribution <d-math>P(X)</d-math>.
+    </p>
+
+    <p>
+      If we have not yet observed any training examples, this distribution revolves around <d-math>\mu=0</d-math>, according to our original assumption.
+      The prior distribution will have the same dimensionality as the number of test points <d-math>N = |X|</d-math>.
+      We will use the kernel to set up the covariance matrix, which has the dimensions <d-math>N \times N</d-math>.
+    </p>
+
+    <p>
+      In the previous section we have looked at examples of different kernels.
+      Since the kernel is used to define the entries of the covariance matrix, it also determines which type of
+      functions from the space of all possible functions are more probable.
+      As the prior distribution does not yet contain any additional information, it is perfect to visualize the influence of the kernel on the distribution of functions.
+      The <a href="#Prior">following figure</a> shows samples of potential functions from prior distributions that were created using different kernels:
+    </p>
+
+    <figure class="l-middle-outset">
+    <d-figure id="Prior">
+    </d-figure>
+      <figcaption> Clicking on the graph results in continuous <span style="color:#C60D88">samples</span> drawn from a
+        Gaussian process using the selected
+        kernel. After each draw, the previous sample fades into the background. Over time, it is possible to see that
+        functions are distributed normally around the <span style="color:#666666">mean µ </span>.
+      </figcaption>
+    </figure>
+
+  <p>
+    Adjusting the parameters allows you to control the shape of the resulting functions. 
+    This also varies the confidence of the prediction.
+    When decreasing the variance <d-math>\sigma</d-math>, a common parameter for all kernels, sampled functions are more concentrated around the mean <d-math>\mu</d-math>.
+    For the <i>Linear</i> kernel, setting the variance <d-math>\sigma_b=0</d-math> results in a set of functions constrained to perfectly intersect the offset point <d-math>c</d-math>.
+    If we set <d-math>\sigma_b=0.2</d-math> we can model uncertainty, resulting in functions that pass close to <d-math>c</d-math>.
+  </p>
+
+    <h3>Posterior Distribution</h3>
+   
+    <p>
+      So what happens if we observe training data?
+      Let's get back to the model of Bayesian inference, which states that we can incorporate this additional information into our model, yielding the <i>posterior</i> distribution <d-math>P(X|Y)</d-math>.
+      We will now take a closer look at how to do this for Gaussian processes.
+    </p>
+
+    <p>
+      First, we form the joint distribution <d-math>P(X,Y)</d-math> between the test points <d-math>X</d-math> and the training points <d-math>Y</d-math>.
+      The result is a multivariate Gaussian distribution with dimensions <d-math>|Y| + |X|</d-math>.
+      As you can see in the <a href="#PosteriorFigure">figure below</a>, we concatenate the training and the test points to compute the corresponding covariance matrix.
+    </p>
+
+    <p>
+      For the next step we need one operation on Gaussian distributions that we have defined earlier.
+      Using <i>conditioning</i> we can find <d-math>P(X|Y)</d-math> from <d-math>P(X,Y)</d-math>.
+      The dimensions of this new distribution matches the number of test points <d-math>N</d-math> and the distribution is also normal.
+      It is important to note, that conditioning leads to derived versions of the mean and the standard deviation: <d-math>X|Y \sim \mathcal{N}(\mu', \Sigma')</d-math>. 
+      More details can be found in the <a href="#MargCond">related section</a> on conditioning multivariate Gaussian distributions.
+      The intuition behind this step is that the training points constrain the set of functions to those that pass through the training points.
+    </p>
+
+    <d-figure id="PosteriorFigure"></d-figure>
+    </figure>
+
+    <p>
+      Analogous to the prior distribution, we could obtain a prediction by sampling from this distribution.
+      But, since sampling involves randomness, we would have no guarantee that the result is a good fit to the data.
+      In order to make a better prediction we can use the other basic operation of Gaussian distributions.
+    </p>
+
+    <p>
+      Through <i>marginalization</i> of each random variable, we can extract the respective mean function value <d-math>\mu'_i</d-math> and standard deviation <d-math>\sigma'_i = \Sigma'_{ii}</d-math> for <d-math>i</d-math>-th test point.
+      In contrast to the prior distribution, we set the mean to <d-math>\mu=0</d-math>, so in this context it is not really of importance.
+      But when we condition the joint distribution of the test and training data the resulting distribution will most likely have a non-zero mean <d-math>\mu' \neq 0</d-math>.
+      Extracting <d-math>\mu'</d-math> and <d-math>\sigma'</d-math> does not only lead to a more meaningful prediction, it also makes a statement about the confidence of he prediction.
+    </p>
+
+    <p>
+      The <a href="#Posterior">following figure</a> shows an example of the conditional distribution.
+      At first, no training points have been observed.
+      Accordingly, the mean prediction remains at <d-math>0</d-math> and the standard deviation is the same for each test point.
+      By hovering over the covariance matrix you can see the influence of each point on the current test point.
+      As long as no training points have been observed, the influence of neighboring points is limited locally.
+    </p>
+
+    <p>
+      The training points can be activated by clicking on them, which leads to a constrained distribution.
+      This change is reflected in the entries of the covariance matrix, and leads to an adjustment of the mean and the standard deviation of the predicted function.
+      As we would expect, the uncertainty of the prediction is small in regions close to the training data and grows as we move further away from those points.
+    </p>
+
+  <figure class="l-middle-outset">
+        <d-figure id="Posterior"></d-figure>
+    <figcaption>
+      Without any activated training data, this figure shows the prior distribution of a Gaussian process with a RBF
+      kernel. When hovering over the covariance matrix, the opacity of the gradient shows the influence of a function
+      value on its neighbours.
+      The distribution changes when we observe training data. Individual points can be activated by clicking on them.
+      The Gaussian process is then constrained to make <span style="color:#918f8f">functions</span>, that intersect
+      these data points, more probable. The best explanation of the training data is given by the updated mean <span
+      style="color:#C60D88">function</span>.
+    </figcaption>
+    </figure>
+  <p>
+    In the constrained covariance matrix, we can see that the correlation of neighbouring points is affected by the
+    training data.
+    If a predicted point lies on the training data, there is no correlation with other points.
+    Therefore, the function must pass directly through it.
+    Predicted values further away are also affected by the training data &mdash; proportional to their distance.
+  </p>
+
+    <h3>Combining different kernels</h3>
+
+    <p>
+      As described earlier, the power of Gaussian processes lies in the choice of the kernel function.
+      This property allows an expert to introduce domain knowledge into the process and lends Gaussian processes their flexibility to capture trends in the training data.
+      For example, by choosing a suitable bandwidth for the RBF kernel, an expert can control how smooth the resulting function will be.
+    </p>
+    <p>
+      A big benefit that kernels provide is that they can be combined together, resulting in a more specialized kernel.
+      This gives domain experts the ability to include further information, leading to a more accurate prediction.
+      The usual way to combine kernels is to multiply them with each other.
+      Let's consider two kernels, an RBF kernel <d-math>k_{\text{rbf}}</d-math> and a periodic kernel <d-math>k_{\text{per}}</d-math>, for example.
+      This is how we would combine the two:
+    </p>
+
+    <d-math block>
+        k^{\ast}(t,t') = k_{\text{rbf}}(t,t') \cdot k_{\text{per}}(t,t')
+    </d-math>
+    
+    <p>
+      In the <a href="#KernelCombinations">figure below</a>, the original training data has an ascending trend with a periodic deviation.
+      Using only a linear kernel, it is possible to achieve a normal linear regression of the points.
+      At first sight the RBF kernel accurately approximates the points.
+      But since the RBF kernel is stationary it will always return to <d-math>\mu=0</d-math> in regions further away from observed training data.
+      This decreases the accuracy for predictions that reach further into the past or the future.
+      Only by using a combination of kernels, both the periodic nature and the non-zero mean trend of the data is maintained.
+      This procedure can be used, for example, in the analysis of weather data.
+    </p>
+
+  <figure class="l-middle-outset">
+    <d-figure id="KernelCombinations">
+    </d-figure>
+        </d-figure>
+    <figcaption> Using the checkboxes, different kernels can be combined to form a new Gaussian process. Only by using a
+      combination of kernels, it is possible to capture the characteristics of more complex training data.
+    </figcaption>
+    </figure>
+
+
+    <h2>Conclusion</h2>
+    <p>
+      With this article, you should have obtained an overview of Gaussian processes, and developed a deeper
+      understanding on how they work.
+      As we have seen, Gaussian processes offer a flexible framework for regression and several extensions exist that
+      make them even more versatile.
+      If we need to deal with real-world data, we will often find measurements that are afflicted with uncertainty and
+      errors. Using Gaussian processes, we can define a kernel function that fits our data and add uncertainty to the
+      prediction.
+
+      For example, one particular extension to Gaussian processes from McHutchon et al.
+      <d-cite key="McHutchon2011"></d-cite>
+      , adapts Gaussian processes to be compatible to such noisy inputs.
+    </p>
+
+    <p>
+      Even though we mostly talk about Gaussian processes in the context of regression, they can be adapted for
+      different purposes, e.g. <i>model-peeling</i> and hypothesis testing.
+      By comparing different kernels on the dataset, domain experts can introduce additional knowledge through
+      appropriate combination and parameterization of the kernel.
+
+      As this might not be possible in many cases, learning specialized kernel functions from the underlying data using
+      deep learning
+      <d-cite key="Hinton2008,Wilson2016"></d-cite>
+      is an area of ongoing research.
+      Furthermore, links between Bayesian inference, Gaussian processes and deep learning have been described in several papers<d-cite key="Lee2018,Damianou2013"></d-cite>.
+    </p>
+
+  <p>
+  If we have sparked your interest, we have compiled a list of further <a href="#FurtherReading">blog posts</a> on the topic of Gaussian processes.
+  In addition, we have linked two <a href="#FurtherReading">Python notebooks</a> that will give you some hands-on experience and help you to get started right away.
+  </p>
+</d-article>
+
+<d-appendix>
+    <h3 id="Acknowledgements">Acknowledgments</h3>
+    <p>
+      We are very grateful to Carla Avolio and Marc Spicker for their feedback on the manuscript.
+      In addition, we want to thank Jonas Körner for helping with the implementation of the figure explaining the multivariate Gaussian distribution.
+      Furthermore, we would like to thank the German Research Foundation (DFG) for financial support within project <a href="http://www.sfbtrr161.de/research/project_a01/index.html" target="_blank">A01</a> of the <a href="http://www.sfbtrr161.de" target="_blank">SFB-TRR 161</a> and within the <a href="https://typo.uni-konstanz.de/questionsInterfaces/" target="_blank">Research Unit FOR 2111</a> with grant number DFG-431/16.</p>
+
+    <h3 id="FurtherReading">Further Reading</h3>
+    <p>The following blog posts offer more interactive visualizations and further reading material on the topic of Gaussian processes:</p>
+    <ul>
+      <li><a href="http://www.tmpl.fi/gp/">Gaussian process regression demo</a> by Tomi Peltola</li>
+      <li><a href="http://katbailey.github.io/post/gaussian-processes-for-dummies/">Gaussian Processes for Dummies</a> by Katherine Bailey</li>
+      <li><a href="https://blog.sigopt.com/posts/intuition-behind-gaussian-processes">Intuition behind Gaussian Processes</a> by Mike McCourt</li>
+      <li><a href="https://blog.dominodatalab.com/fitting-gaussian-process-models-python/">Fitting Gaussian Process Models in Python</a> by Chris Fonnesbeck</li>
+    </ul>
+  <p>If you want more of a hands-on experience, there are also many Python notebooks available:</p>
+  <ul>
+    <li><a href="https://blog.dominodatalab.com/fitting-gaussian-process-models-python/">Fitting Gaussian Process Models
+      in Python</a> by Chris Fonnesbeck
+    </li>
+    <li><a href="http://nbviewer.jupyter.org/github/adamian/adamian.github.io/blob/master/talks/Brown2016.ipynb/">Gaussian
+      process lecture</a> by Andreas Damianou
+    </li>
+  </ul>
+
+    <d-bibliography src="references.bib"></d-bibliography>
+</d-appendix>
+

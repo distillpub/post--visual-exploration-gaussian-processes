@@ -1,0 +1,45 @@
+<svg height="82" width="112">
+  <g transform="translate(1,1)">
+    <rect x="0" y="0" width="50" height="35" rx="5" ry="5" class="entryBox" />
+    <text x="25" y="23" class="entry">{sigma1}</text>
+  </g>
+  <g transform="translate(61,1)">
+    <rect x="0" y="0" width="50" height="35" rx="5" ry="5" class="entryBox" />
+    <text x="25" y="23" class="entry">{corr}</text>
+  </g>
+  <g transform="translate(1,46)">
+    <rect x="0" y="0" width="50" height="35" rx="5" ry="5" class="entryBox" />
+    <text x="25" y="23" class="entry">{corr}</text>
+  </g>
+  <g transform="translate(61,46)">
+    <rect x="0" y="0" width="50" height="35" rx="5" ry="5" class="entryBox" />
+    <text x="25" y="23" class="entry">{sigma2}</text>
+  </g>
+</svg>
+
+<style>
+  .entry {
+    font-size: 14px;
+    fill: rgba(0,0,0,0.8);
+    text-anchor: middle;
+    alignment-baseline: center;
+  }
+
+  .entryBox {
+    fill: hsl(200, 20%, 97%);
+    stroke-width: 1;
+    stroke: rgba(0,0,0,0.2);
+  }
+</style>
+
+<script>
+  export default {
+    data() {
+      return {
+        sigma1: 1,
+        sigma2: 1,
+        corr: 0.5
+      };
+    },
+  };
+</script>

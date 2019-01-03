@@ -1,0 +1,196 @@
+<div ref:gridMultipleKernel class="kernel-grid">
+{#each kernels as k}
+  <div class="grid-item">
+    <div><h4>{k.name}</h4></div>
+    <div class="equation"><d-math>{k.equation}</d-math></div>
+    <div>
+      <KernelCovMat kernel={k.kernel} params={k.params} name={k.name}/>
+    </div>
+  </div>
+{/each}
+  <div class="grid-item">
+    <div ref:padder><ColorScale colorScale={scale} /></div>
+  </div>
+</div>
+<svg ref:annotations width="300" height="150">
+  <text ref:description class="annotation">
+    <tspan x="50" dy="1.5em">For the
+      <tspan font-weight="bold">{currentSelectedKernel}</tspan>
+      kernel
+    </tspan>
+    <tspan x="50" dy="1.5em">the parameter
+      <tspan font-weight="bold">{currentSelectedParameter.name}</tspan>
+      determines
+    </tspan>
+    <tspan x="50" dy="1.5em"> {currentSelectedParameter.description}</tspan>
+  </text>
+</svg>
+
+<style>
+
+  ref:annotations {
+    position: absolute;
+    pointer-events: none;
+    margin: 1em;
+    right: -200px;
+    bottom: 5px;
+    overflow: visible;
+  }
+
+    ref:padder {
+      padding-top: 108px
+    }
+
+    .kernel-grid {
+        display: inline-grid;
+        grid-template-columns: auto auto auto auto;
+    }
+
+    .grid-item {
+      margin: 0.5em;
+    }
+
+    .equation {
+        padding-bottom: 1em;
+      height: 36px;
+    }
+
+</style>
+
+<script>
+  import * as gp from '../gp';
+  import KernelCovMat from './KernelCovMat.html';
+  import ColorScale from './ColorScale.html';
+  import * as d3 from 'd3';
+
+  const rbf = {
+    kernel: gp.rbf,
+    name: 'RBF Kernel',
+    equation: '\\sigma^2 \\exp \\left( - \\frac{||t-t\'||^2}{2 l^2} \\right)',
+    params: [{
+      name: 'Variance σ',
+      description: 'the average distance away from the function\'s mean.',
+      value: 0.8,
+      min: 0,
+      max: 1,
+    }, {
+      name: 'Length l',
+      description: 'the reach of influence on neighbors.',
+      value: 0.8,
+      min: 0.01,
+      max: 2,
+    }]
+  };
+
+  const periodic = {
+    kernel: gp.periodic,
+    name: 'Periodic',
+    equation: '\\sigma^2 \\exp \\left( - \\frac{2 \\sin^2(\\pi |t-t\'| / p)}{l^2} \\right)',
+    params: [{
+      name: 'Variance σ',
+      description: 'the average distance away from the function\'s mean.',
+      value: 0.8,
+      min: 0,
+      max: 1,
+    }, {
+      name: 'Length l',
+      description: 'the reach of influence on neighbors.',
+      value: 0.8,
+      min: 0.01,
+      max: 2,
+    },
+    {
+      name: 'Periodicity p',
+      description: 'the distance between repetitions.',
+      value: 0.5,
+      min: 0,
+      max: Math.PI,
+    }]
+  };
+
+  const linear = {
+    kernel: gp.linear,
+    name: 'Linear',
+    equation: '\\sigma_b^2 + \\sigma^2 (t - c)(t\' - c)',
+    params: [{
+      name: 'Variance σ',
+      description: 'the average distance away from the function\'s mean.',
+      value: 0.3,
+      min: 0,
+      max: 1,
+    },
+    {
+      name: 'Variance σ_b',
+      description: 'the certainty around C.',
+      value: 0.8,
+      min: 0,
+      max: 1,
+    },
+    {
+      name: 'Offset c',
+      description: 'the intersection point of all functions.',
+      value: 0,
+      min: -2,
+      max: 2,
+    }]
+  };
+
+  export default {
+    components: {KernelCovMat, ColorScale},
+    data() {
+      return {
+        kernels: [rbf, periodic, linear],
+        scale: d3.scaleSequential(d3.interpolateGnBu),
+        currentSelectedParameter: {description: '...', name: '...'},
+        currentSelectedKernel: '',
+        currentSelectedRef: ''
+      };
+    },
+    computed: {
+      connectedline: ({_context}) => {
+        return d3.line()
+          .curve(d3.curveStepBefore)
+          .x(d => d[0])
+          .y(d => d[1]);
+      },
+    },
+    methods: {
+      resample() {
+
+      }
+    },
+    onupdate({_changed, current, _previous}) {
+      const svg = d3.select(this.refs.annotations);
+      const {currentSelectedRef} = this.get();
+      if (currentSelectedRef != '') {
+        const labelRect = currentSelectedRef.getBoundingClientRect();
+        const positionX1 = labelRect.left - this.refs.annotations.getBoundingClientRect().left + labelRect.width / 2;
+        const positionY1 = labelRect.top - this.refs.annotations.getBoundingClientRect().top - labelRect.height;
+        svg
+          .select('.lineConnector')
+          .attr('d', function () {
+            return current.connectedline([[positionX1, positionY1 - 5], [positionX1, positionY1 - 20], [30, positionY1 - 20], [30, 15], [40, 15]]);
+          });
+        d3.select(this.refs.description)
+          .style('opacity', 1);
+      }
+    },
+    oncreate() {
+      const svg = d3.select(this.refs.annotations);
+
+      //Enter
+      svg
+        .append('path')
+        .classed('lineConnector', true)
+        .attr('stroke', 'rgba(0, 0, 0, 0.2)')
+        .attr('fill', 'transparent')
+        .style('stroke-width', '2px')
+        .style('stroke-dasharray', 4);
+
+      d3.select(this.refs.description)
+        .style('opacity', 0);
+
+    }
+  };
+
+</script>

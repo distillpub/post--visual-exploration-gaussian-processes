@@ -1,0 +1,311 @@
+<div>
+  <input type="radio" checked="checked" id="rbf" name="kernel" value="RBF" on:change="switchRBF()">
+  <label for="rbf"> RBF</label> 
+  <input type="radio" id="periodic" name="kernel" value="Periodic" on:change="switchPeriodic()">
+  <label for="periodic"> Periodic</label> 
+  <input type="radio" id="linear" name="kernel" value="Linear" on:change="switchLinear()">
+  <label for="linear"> Linear</label> 
+</div>
+<div ref:gridMultipleKernel class="kernel-grid">
+  <div class="grid-item" on:click="toggleOnOff()">
+  <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}">
+    <g>
+    {#each shadowPaths as sp}
+    <path d="{sp}" class="shadowLine" />
+    {/each}
+    </g>
+    <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
+    <!--<text x="{context.width - 14}" y="{toV(context, 0)-5}" class="annotation">μ</text>-->
+    <!--<text x="{context.width - 42}" y="{toV(context, 2)-5}" class="annotation">μ + 2σ</text>-->
+    <!--<text x="{context.width - 42}" y="{toV(context, -2)-5}" class="annotation">μ - 2σ</text>-->
+    {#if active}
+    <text x="5" y ="15" class="annotation"><tspan fill="rgb(245, 181, 62)" font-style="italic">(click to pause)</tspan></text>
+    {:else}
+    <text x="5" y ="15" class="annotation"><tspan fill="rgb(245, 181, 62)" font-style="italic">(click to start)</tspan></text>
+    {/if}
+  </svg>
+  </div>
+  <div class="grid-item">
+    <KernelCovMat ref:covMat n={countDimensions} gridSize={1} width={100} height={100} offset={0} bind:kernel=kernel
+                  bind:params=params/>
+  </div>
+</div>
+
+<style>
+
+  .kernel-grid {
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto;
+  }
+
+  .grid-item {
+    margin: 0.5em;
+  }
+
+  /*ref:mean {
+    fill: none;
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 2px;
+  }*/
+
+  /*.sdLine .sdPlus .sdMinus {
+    fill: none;
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 2px;
+    stroke-dasharray: 4;
+  }*/
+
+  /*.line {
+    fill: none;
+    stroke: #c51b8a;
+    stroke-width: 2px;
+  }*/
+
+  .shadowLine {
+    fill: none;
+    stroke: rgba(0,0,0,0.1);
+    stroke-width: 2px;
+  }
+</style>
+
+<script>
+  import KernelCovMat from './KernelCovMat.html';
+  import * as d3 from 'd3'; 
+  import {Context} from './util/context';
+  import * as gp from '../gp';
+
+  const rbf = {
+    kernel: gp.rbf,
+    name: 'RBF Kernel',
+    equation: '\\exp \\left( - \\frac{||t-t\'||^2}{2 bl^2} \\right)',
+    params: [{
+      name: 'Variance σ',
+      value: 0.8,
+      min: 0,
+      max: 1,
+    }, {
+      name: 'Length l',
+      description: 'the reach of influence on neighbors.',
+      value: 0.8,
+      min: 0.01,
+      max: 2,
+    }]
+  };
+
+  const periodic = {
+    kernel: gp.periodic,
+    name: 'Periodic',
+    equation: '\\exp \\left( - \\frac{2 \\sin^2(\\pi |t-t\'| / p)}{l^2} \\right)',
+    params: [{
+      name: 'Variance σ',
+      value: 0.9,
+      min: 0,
+      max: 1,
+    }, {
+      name: 'Length l',
+      description: 'the reach of influence on neighbors.',
+      value: 0.51,
+      min: 0.01,
+      max: 2,
+    },
+    {
+      name: 'Periodicity p',
+      description: 'the distance between repetitions.',
+      value: 0.31,
+      min: 0,
+      max: Math.PI,
+    }]
+  };
+
+  const linear = {
+    kernel: gp.linear,
+    name: 'Linear',
+    equation: '\\sigma_b^2 + (t - c)(t\' - c)',
+    params: [{
+      name: 'Variance σ',
+      value: 0.15,
+      min: 0,
+      max: 1,
+    },
+    {
+      name: 'Variance σ_b',
+      description: 'the \'certainty\' around C.',
+      value: 0.1,
+      min: 0,
+      max: 1,
+    },
+    {
+      name: 'Offset c',
+      description: 'the intersection point of all functions.',
+      value: 2,
+      min: -2,
+      max: 2,
+    }]
+  };
+
+  export default {
+    components: {KernelCovMat},
+    data() {
+      return {
+        context: new Context(500, 350, [-5, 5], [-10, 10]),
+        curve: [],
+        shadows: [],
+        active: false,
+        countDimensions: 100,
+        kernel: rbf.kernel,
+        name: 'RBF Kernel',
+        params: rbf.params,
+        meanCurve: []
+      };
+    },
+
+    computed: {
+      line: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1]));
+      },
+      zero: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1]));
+      },
+      sdPlus: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1] + 2 * d[2]));
+      },
+      sdMinus: ({context}) => {
+        return d3.line()
+          .x(d => context.u(d[0]))
+          .y(d => context.v(d[1] - 2 * d[2]));
+      },
+      sdArea: ({context}) => {
+        return d3.area()
+          .x(d => context.u(d[0]))
+          .y0(d => context.v(d[1] - 2 * d[2]))
+          .y1(d => context.v(d[1] + 2 * d[2]));
+      },
+      shadowPaths: ({ shadows, line }) => shadows.map(line),
+    },
+
+    methods: {
+      toggleOnOff() {
+        const { active } = this.get();
+        if(!active) {
+          this.resample();
+          this.interval = setInterval(() => {
+            this.resample();
+          }, 1000);
+        } else {
+          clearInterval(this.interval);
+        }
+        this.set({ active: !active });
+      },
+
+      switchKernel(k, p) {
+        this.set({kernel: k, params: p, curve: [], shadows: []});
+        this.refs.covMat.set({kernel: k, params: p});
+        this.resample();
+      },
+      switchRBF() {
+        this.switchKernel(rbf.kernel, rbf.params);
+      },
+      switchPeriodic() {
+        this.switchKernel(periodic.kernel, periodic.params);
+      },
+      switchLinear() {
+        this.switchKernel(linear.kernel, linear.params);
+      },
+      resample() {
+        const {context, curve, shadows, countDimensions, params, kernel} = this.get();
+
+        const maxShadows = 30;
+        if(curve.length > 0) {
+          if(shadows.length > maxShadows) {
+            shadows.shift();
+          }
+          shadows.push(curve);
+        }
+        // creates linear spaced values
+        const N = countDimensions;
+        const [xmin, xmax] = context.xDomain();
+        const step = (xmax - xmin) / (N - 1);
+        const xs = d3.range(xmin, xmax + step, step);
+
+        const paramValues = params.map(p => p.value);
+        const fn = kernel.apply(null, paramValues);
+
+        const process = gp.gaussianProcess(fn, xs);
+        const ys = process.sample();
+        const sd = process.getSd();
+        const ysMean = process.getMean();
+
+        const pts = d3.zip(xs, ys, sd);
+        const ptsMean = d3.zip(xs, ysMean, sd);
+        this.set({curve: pts, shadows: shadows, meanCurve: ptsMean});
+      },
+    },
+
+    onupdate({_changed, current, _previous}) {
+      const svg = d3.select(this.refs.svgArea).transition();
+      svg.select('.curve').duration(750).attr('d', current.line(current.curve));
+      svg.select('.zero').transition().duration(750).attr('d', current.zero(current.meanCurve));
+      svg.select('.sdArea').transition().duration(750).attr('d', current.sdArea(current.meanCurve));
+      svg.select('.sdPlus').transition().duration(750).attr('d', current.sdPlus(current.meanCurve));
+      svg.select('.sdMinus').transition().duration(750).attr('d', current.sdMinus(current.meanCurve));
+    },
+
+    oncreate() {
+      this.resample();
+      const {curve, line, meanCurve, sdArea, zero, sdPlus, sdMinus} = this.get();
+      const svg = d3.select(this.refs.svgArea);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'sdArea')
+        .attr('stroke', 'none')
+        .attr('fill', 'rgba(0,0,0,0.05)')
+        .style('opacity', 0.5)
+        .attr('d', sdArea);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'zero')
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(0,0,0,0.2)')
+        .attr('stroke-width', '2px')
+        .attr('d', zero);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'sdPlus')
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(0,0,0,0.2)')
+        .attr('stroke-dasharray', '4')
+        .attr('stroke-width', '2px')
+        .attr('d', sdPlus);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'sdMinus')
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(0,0,0,0.2)')
+        .attr('stroke-dasharray', '4')
+        .attr('stroke-width', '2px')
+        .attr('d', sdMinus);
+
+      svg.append('path').data([curve])
+        .attr('class', 'curve')
+        .attr('fill', 'none')
+        .attr('stroke', '#c51b8a')
+        .attr('stroke-width', '2px')
+        .attr('d', line);
+    },
+
+    ondestroy() {
+      clearInterval(this.interval);
+    },
+
+    helpers: {
+      toV(context, y) {
+        return context.v(y);
+      }
+    }
+  };
+</script>

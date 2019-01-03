@@ -1,0 +1,64 @@
+<svg>
+  {#each ellipses as e}
+  <ellipse cx="{e.cx}" cy="{e.cy}" rx="{e.rx}" ry="{e.ry}" fill="{e.color}" transform="rotate({e.rotation} {e.cx} {e.cy})"/>
+  {/each}
+</svg>
+
+<script>
+  // Computing the ellipses according to:
+  // http://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
+  import * as gauss from '../gaussian';
+  import * as d3 from 'd3'; 
+  import {Context} from './util/context';
+
+
+  const colorScale = d3.scaleSequential(d3.interpolateRdPu).domain([0, 0.2]);
+  const intervals = d3.range(0.1, 6, 0.2);
+
+  export default {
+
+    data() {
+      return {
+        context: new Context(300, 300, [-2, 2], [-2, 2]),
+        gaussian: new gauss.Gaussian([0,0], [[1,0.7],[0.7,2]]),
+      };
+    },
+    computed: {
+      ellipses: ({ gaussian, context }) => {
+        // Taken from: https://math.stackexchange.com/q/395698
+        const b = gaussian.cov.get(0,1);
+        const c = gaussian.cov.get(1,0);
+        if (b === 0 && c == 0) {
+          return 0;
+        }
+        const a = gaussian.cov.get(0,0);
+        const d = gaussian.cov.get(1,1);
+
+        const trace = a + d;
+        const det = (a * d) - (c * b);
+
+        // Compute the eigenvalues (radii)
+        const L1 = trace / 2 + Math.sqrt(((trace*trace) / 4) - det);
+        const L2 = trace / 2 - Math.sqrt(((trace*trace) / 4) - det);
+
+        // Choose the largest eigenvalue
+        const v = (L1 >= L2) ? [(L1-det), c] : [(L2-det), c];
+        const angle = -(Math.atan(v[1]/v[0])) * 180 / Math.PI;
+
+        return intervals.map(i => {
+          const rx = Math.sqrt(i * L1);
+          const ry = Math.sqrt(i * L2);
+          const color = gaussian.at([rx, ry]);
+          return {
+            cx: context.u(gaussian.mean.get(0,0)),
+            cy: context.v(gaussian.mean.get(1,0)),
+            rx: context.u(rx)-context.u(0),
+            ry: context.v(-ry)-context.v(0),
+            color: colorScale(color),
+            rotation: angle
+          };
+        }).reverse();
+      } 
+    }
+  };
+</script>

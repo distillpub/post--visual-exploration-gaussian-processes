@@ -1,0 +1,360 @@
+<div>
+  <svg class="plot" ref:covMat xmlns:bind="http://www.w3.org/1999/xhtml"></svg>
+</div>
+{#if slider}
+{#each params as p}
+<div>
+  <p class="label"><input disabled class="labelSlider" bind:value=p.name> = <input disabled class="entry"
+                                                                                   bind:value=p.value min='{p.min}'
+                                                                                   max='{p.max}'></p>
+  <input bind:value=p.value type='range' min='{p.min}' max='{p.max}' step='0.01'
+         on:change="updateSlider(p, name, this)">
+</div>
+{/each}
+{/if}
+<style>
+
+  input {
+    font-size: 12px;
+  }
+
+  ref:covMat {
+    background: none;
+  }
+
+  .entry {
+    /*text-align: center;*/
+    max-width: 40px;
+    border: 0px solid;
+    background-color: transparent;
+  }
+
+  .labelSlider {
+    text-align: right;
+    max-width: 80px;
+    border: 0px solid;
+    background-color: transparent;
+  }
+</style>
+
+<script>
+  import * as d3 from 'd3';
+  import * as gp from '../gp';
+  //  import * as cp from '../components/covarianceMatrix';
+
+  export default {
+    data() {
+      return {
+        name: 'RBF',
+        kernel: gp.rbf,
+        params: [{
+          name: 'Sigma',
+          value: 1,
+          min: 0,
+          max: 1,
+        }, {
+          name: 'Length',
+          value: 1,
+          min: 0,
+          max: 2,
+        }],
+        interaction: false,
+        slider: true,
+        covMatrix: [],
+        n: 25,
+        width: 150,
+        height: 150,
+        hoveredRow: -1,
+        hoveredRowIdx: -1,
+        colorsRow: [],
+        showText: false,
+        offset: 0,
+        gridSize: 6,
+        invertColor: true,
+        xs: [],
+        external: false,
+        shouldResample: true,
+        colorScale: d3.scaleSequential(d3.interpolateGnBu).domain([1, 0]),
+        gridNode: -1
+
+      };
+    },
+    computed: {
+      axisScale: ({colorScale}) => {
+        return d3.scaleLinear().domain(colorScale.domain()).range([0, 1]);
+      },
+      grid: ({n}) => {
+        return new Array(n * n);
+      }
+    },
+    methods: {
+      updateSlider(value, name, ref) {
+        this.set({shouldResample: true});
+        this.root.resample();
+        this.root.set({
+          currentSelectedParameter: value,
+          currentSelectedKernel: name,
+          currentSelectedRef: ref,
+          shadows: []
+        });
+      },
+      getValue(value) {
+        const {params} = this.get();
+        if (value > params.max) {
+          return params.max;
+        } else if (value < params.min) {
+          return params.min;
+        }
+        return value;
+      },
+      hoverGrid(currData, parent) {
+        const {gridSize, offset} = this.get();
+        let diag = 0;
+        if (currData.column == currData.row) {
+          diag = currData.column;
+        } else if (currData.column > currData.row) {
+          diag = Math.min(currData.column, currData.row);
+        } else if (currData.column < currData.row) {
+          diag = Math.max(currData.column, currData.row);
+        }
+
+        const selectedRect = parent
+          .selectAll('.covSelectedRect');
+
+        selectedRect
+          .attr('x', offset + ((diag) * (gridSize + offset)))
+          .attr('y', offset + (diag) * (gridSize + offset));
+
+        parent
+          .selectAll('.covSelectedRectRow')
+          .attr('x', (_d, i) => (offset + ((i) * (gridSize + offset))))
+          .attr('y', offset + (diag) * (gridSize + offset));
+
+      },
+      returnColor(value, invert) {
+        let result;
+        const {colorScale, axisScale} = this.get();
+        if (invert) {
+          result = colorScale(axisScale.invert(value));
+        } else {
+          result = colorScale(axisScale(value));
+        }
+        return result;
+      },
+      updateCovMat() {
+        const currentObject = this;
+        const {showText, covMatrix, grid, gridNode} = currentObject.get();
+        const svg = d3.select(this.refs.covMat);
+
+        const covarianceMat = covMatrix;
+
+        //create Vis
+        let count = 0;
+        for (let i = 0; i < covarianceMat.length; i++) {
+          const row = covarianceMat[i];
+          for (let j = 0; j < row.length; j++) {
+            grid[count] = {row: i, column: j, cov: covarianceMat[i][j]};
+            count++;
+          }
+        }
+
+        //// Matrix Rect
+        //Data Join
+        const gridD3 = gridNode.data(grid);
+
+        gridD3.exit().remove();
+
+        gridD3
+          .style('fill', d => {
+            return currentObject.returnColor(d.cov);
+          });
+
+        this.set({gridNode: gridNode});
+
+        if (showText === 1) {
+          //// Matrix Text
+          //Data Join
+          svg.selectAll('text')
+            .data(grid)
+            .text(function (d) {
+              return Math.round(d.cov * 10) / 10;
+            });
+
+        }
+
+      },
+      externalCov(covMat) {
+        this.set({covMatrix: covMat});
+        this.updateCovMat();
+      },
+      internalCov() {
+        const {n, params, kernel} = this.get();
+        let {xs} = this.get();
+        const xmin = -5;
+        const xmax = 5;
+
+        xs = d3.range(0, n).map(d3.scaleLinear().domain([0, n]).range([xmin, xmax]));
+        const paramValues = params.map(p => p.value);
+        const fn = kernel.apply(null, paramValues);
+        const covMat = gp.covMatrix(xs, fn);
+        this.set({covMatrix: covMat, xs: xs});
+        this.updateCovMat();
+      }
+
+    },
+    onupdate({_changed, _current, _previous}) {
+      const {n, params, kernel, external} = this.get();
+      if (!external) {
+        let {xs} = this.get();
+        const xmin = -5;
+        const xmax = 5;
+
+        xs = d3.range(0, n).map(d3.scaleLinear().domain([0, n]).range([xmin, xmax]));
+        const paramValues = params.map(p => p.value);
+        const fn = kernel.apply(null, paramValues);
+        const covMat = gp.covMatrix(xs, fn);
+        this.set({covMatrix: covMat, xs: xs, shouldResample: false});
+        this.updateCovMat();
+      }
+    },
+    oncreate() {
+      const {params, kernel, n} = this.get();
+      const currentObject = this;
+      let {xs} = this.get();
+      const xmin = -5;
+      const xmax = 5;
+
+      xs = d3.range(0, n).map(d3.scaleLinear().domain([0, n]).range([xmin, xmax]));
+      const paramValues = params.map(p => p.value);
+      const fn = kernel.apply(null, paramValues);
+      const covMat = gp.covMatrix(xs, fn);
+
+      const {gridSize, offset, width, height, interaction, showText, grid} = currentObject.get();
+      let {hoveredRow, hoveredRowIdx, gridNode} = currentObject.get();
+      const svg = d3.select(this.refs.covMat)
+        .attr('width', width + offset)
+        .attr('height', height + offset);
+
+      const covarianceMat = covMat;
+
+      //create Vis
+      let count = 0;
+      for (let i = 0; i < covarianceMat.length; i++) {
+        const row = covarianceMat[i];
+        for (let j = 0; j < row.length; j++) {
+          grid[count] = {row: i, column: j, cov: covarianceMat[i][j]};
+          count++;
+        }
+      }
+
+      //// Matrix Rect
+      //Data Join
+      gridNode = svg.selectAll('.covRect');
+
+      const gridD3 = gridNode.data(grid);
+
+      //Exit
+      gridD3.exit().remove();
+
+      //Enter
+      gridD3.enter().append('rect')
+        .attr('class', 'covRect')
+        .attr('width', gridSize)
+        .attr('height', gridSize)
+        .attr('x', d => offset + ((d.column) * (gridSize + offset)))
+        .attr('y', d => offset + (d.row) * (gridSize + offset))
+        .style('fill', function (d) {
+          const newColor = currentObject.returnColor(d.cov);
+          return newColor;
+        });
+
+      //Update
+      gridD3
+        .style('fill', function (d) {
+          return currentObject.returnColor(d.cov);
+        });
+
+      gridNode = svg.selectAll('.covRect');
+
+      this.set({gridNode: gridNode});
+
+      if (showText === 1) {
+        //// Matrix Text
+        //Data Join
+        const gridText = svg.selectAll('text')
+          .data(grid);
+
+        //Exit
+        gridText.exit().remove();
+
+        //Enter
+        gridText.enter().append('text')
+          .attr('class', 'covText')
+          .style('font-size', Math.min(2 * gridSize / 3, (2 * gridSize / 3 - 8)) + 'px')
+          .attr('x', d => ((d.column) * (gridSize + offset)) + (gridSize / 2))
+          .attr('y', d => (d.row) * (gridSize + offset) + (gridSize / 2))
+          .style('dominant-baseline', 'central')
+          .style('alignment-baseline', 'central')
+          .style('text-anchor', 'middle')
+          .text(function (d) {
+            return Math.round(d.cov * 10) / 10;
+          });
+        //update
+        gridText.text(function (d) {
+          return Math.round(d.cov * 10) / 10;
+        });
+
+      }
+      if (interaction) {
+        svg.append('rect')
+          .classed('covSelectedRect', true)
+          .attr('width', gridSize + offset)
+          .attr('height', gridSize + offset)
+          .style('stroke-width', 1 + 'px')
+          .style('stroke-opacity', '1')
+          .style('stroke', 'black')
+          .style('opacity', 0)
+          .style('fill', 'none');
+
+        svg.selectAll('covSelectedRectRow').data(Array.from(Array(n).keys())).enter().append('rect')
+          .classed('covSelectedRectRow', true)
+          .attr('width', gridSize + offset)
+          .attr('height', gridSize + offset)
+          .style('stroke-width', 1 + 'px')
+          .style('stroke-opacity', '0.5')
+          .style('stroke', 'black')
+          .style('opacity', 0)
+          .style('fill', 'none');
+
+        svg.selectAll('.covRect').on('mouseover', function (d) {
+          const parent = d3.select(d3.select(this).node().parentNode.parentNode);
+          parent.selectAll('.covSelectedRect').style('opacity', 1);
+          parent.selectAll('.covSelectedRectRow').style('opacity', 1);
+          currentObject.hoverGrid(d, parent);
+          hoveredRow = d;
+          const colorsRow = svg.selectAll('.covRect').filter(function (h) {
+            if (h.row === d.row) {
+              hoveredRowIdx = h.row;
+            }
+            return h.row === d.row;
+          });
+          const result2 = colorsRow.data();
+          currentObject.set({
+            colorsRow: result2,
+            hoveredRow: hoveredRow,
+            hoveredRowIdx: hoveredRowIdx,
+            shouldResample: false
+          });
+        });
+        svg.on('mouseleave', function () {
+          const parent = d3.select(d3.select(this).node().parentNode.parentNode);
+          parent.selectAll('.covSelectedRect').style('opacity', 0);
+          parent.selectAll('.covSelectedRectRow').style('opacity', 0);
+          currentObject.set({colorsRow: [], hoveredRow: -1, hoveredRowIdx: -1, shouldResample: false});
+        });
+      }
+
+    },
+    helpers: {}
+  };
+</script>
