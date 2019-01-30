@@ -95,9 +95,10 @@
   <p>
     Gaussian processes are a powerful tool in the machine learning toolbox<d-cite key="Rasmussen2004"></d-cite>.
     They allow us to make predictions about our data by incorporating prior knowledge.
-    Their most obvious area of application are regression problems, for example in robotics, but they can also be extended to classification and clustering tasks<d-cite key="Kapoor2010, Kim2007"></d-cite>.
-    Just a quick recap: the goal of regression is to find a function that describes a given set of data points as closely as possible.
-    This process is called <i>fitting</i> a function to the data.
+    Their most obvious area of application is <i>fitting</i> a function to the data.
+    This is called regression and is used, for example, in robotics or time series forecasting.
+    But Gaussian processes are not limited to regression &mdash; they can also be extended to classification and clustering tasks<d-cite key="Kapoor2010, Kim2007"></d-cite>.
+
     For a given set of training points, there are potentially infinitely many functions that fit the data.
     Gaussian processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>.
     The mean of this probability distribution then represents the most probable characterization of the data.
@@ -112,18 +113,20 @@
 
     <h2>Multivariate Gaussian distributions</h2>
   <p>
-    Before we can explore Gaussian processes, we need to understand the mathematical concepts they are based on. As the
-    name suggests, the Gaussian distribution (which is often also referred to as <i>normal</i> distribution) is the
-    basic building block of Gaussian processes. In particular, we are interested in the multivariate case of this
-    distribution, where each random variable is distributed normally and their joint distribution is also Gaussian. In
-    general, the multivariate Gaussian distribution is defined by a mean vector
-    <d-math>\mu</d-math>
-    and a covariance matrix
-    <d-math>\Sigma</d-math>
-    .
+    Before we can explore Gaussian processes, we need to understand the mathematical concepts they are based on.
+    As the name suggests, the Gaussian distribution (which is often also referred to as <i>normal</i> distribution) is the basic building block of Gaussian processes.
+    In particular, we are interested in the multivariate case of this distribution, where each random variable is distributed normally and their joint distribution is also Gaussian.
+    The multivariate Gaussian distribution is defined by a mean vector <d-math>\mu</d-math> and a covariance matrix <d-math>\Sigma</d-math>.
   </p>
 
-    <p>The mean vector <d-math>\mu</d-math> describes the expected value of the distribution. Each of its components describes the mean of the corresponding dimension. <d-math>\Sigma</d-math> models the variance along each dimension and determines how the different random variables are correlated. The covariance matrix is always symmetric and positive semi-definite<d-cite key="Hazewinkel1994"></d-cite>. The diagonal of <d-math>\Sigma</d-math> consists of the standard deviation <d-math>\sigma_i</d-math> of the <d-math>i</d-math>-th random variable, whereas the off-diagonal elements describe correlations between each of the components <d-math>\sigma_{ij}</d-math>.</p>
+  <p>
+    The mean vector <d-math>\mu</d-math> describes the expected value of the distribution.
+    Each of its components describes the mean of the corresponding dimension.
+    <d-math>\Sigma</d-math> models the variance along each dimension and determines how the different random variables are correlated.
+    The covariance matrix is always symmetric and positive semi-definite<d-cite key="Hazewinkel1994"></d-cite>.
+    The diagonal of <d-math>\Sigma</d-math> consists of the variance <d-math>\sigma_i^2</d-math> of the <d-math>i</d-math>-th random variable.
+    And the off-diagonal elements <d-math>\sigma_{ij}</d-math> describe the correlation between the <d-math>i</d-math>-th and <d-math>j</d-math>-th random variable.
+  </p>
 
     <d-math block>
         X = \begin{bmatrix} X_1 \\ X_2 \\ \vdots \\ X_n \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma)
