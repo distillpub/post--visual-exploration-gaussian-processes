@@ -87,34 +87,27 @@
 <d-article>
     <h3>This article was presented at <a href="http://visxai.io/" target="_blank">VISxAI</a>, it is now under review at <a href="https://distill.pub/" target="_blank">distill.pub</a>.</h3>
     <h2>Introduction</h2>
-  <p>Even if you have spent some time reading about machine learning, chances are that you have never heard of Gaussian
-    processes.
+  <p>
+    Even if you have spent some time reading about machine learning, chances are that you have never heard of Gaussian processes.
     And if you have, rehearsing the basics is always a good way to refresh your memory.
-    With this blog post we want to give an introduction to Gaussian processes and make the mathematical intuition behind
-    them more approachable.
+    With this blog post we want to give an introduction to Gaussian processes and make the mathematical intuition behind them more approachable.
   </p>
-  <p>Gaussian processes are a powerful tool in the machine learning toolbox
-    <d-cite key="Rasmussen2004"></d-cite>
-    . They allow us to make predictions about our data by incorporating prior knowledge.
-    Their most obvious area of application are regression problems, for example in robotics, but they can also be
-    extended to classification and clustering tasks
-    <d-cite key="Kapoor2010, Kim2007"></d-cite>
-    . Just a quick recap: the goal of regression is to find a function that describes a given set of data points as
-    closely as possible. This process is called <i>fitting</i> a function to the data.
-    For a given set of training points, there are potentially infinitely many functions that fit the data. Gaussian
-    processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>. The mean
-    of this probability distribution then represents the most probable characterization of the data. Furthermore,
-    using a probabilistic approach allows us to incorporate the confidence of the prediction into the regression result.
+  <p>
+    Gaussian processes are a powerful tool in the machine learning toolbox<d-cite key="Rasmussen2004"></d-cite>.
+    They allow us to make predictions about our data by incorporating prior knowledge.
+    Their most obvious area of application are regression problems, for example in robotics, but they can also be extended to classification and clustering tasks<d-cite key="Kapoor2010, Kim2007"></d-cite>.
+    Just a quick recap: the goal of regression is to find a function that describes a given set of data points as closely as possible.
+    This process is called <i>fitting</i> a function to the data.
+    For a given set of training points, there are potentially infinitely many functions that fit the data.
+    Gaussian processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>.
+    The mean of this probability distribution then represents the most probable characterization of the data.
+    Furthermore, using a probabilistic approach allows us to incorporate the confidence of the prediction into the regression result.
   </p>
 
   <p>
-    We will first explore the mathematical foundation they are built on, and you can follow along using interactive
-    figures
-    and hands-on examples.
+    We will first explore the mathematical foundation they are built on, and you can follow along using interactive figures and hands-on examples.
     They help to explain the impact of individual components, and show the flexibility of Gaussian processes.
-    After following this article we hope that you will have a visual intuition on how Gaussian processes work and how
-    you can configure them for different types of data.
-
+    After following this article we hope that you will have a visual intuition on how Gaussian processes work and how you can configure them for different types of data.
   </p>
 
     <h2>Multivariate Gaussian distributions</h2>
