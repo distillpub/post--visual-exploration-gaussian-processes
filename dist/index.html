@@ -464,22 +464,45 @@
     <p>
       A big benefit that kernels provide is that they can be combined together, resulting in a more specialized kernel.
       This gives domain experts the ability to include further information, leading to a more accurate prediction.
-      The usual way to combine kernels is to multiply them with each other.
-      Let's consider two kernels, an RBF kernel <d-math>k_{\text{rbf}}</d-math> and a periodic kernel <d-math>k_{\text{per}}</d-math>, for example.
-      This is how we would combine the two:
+      The decision which kernel to use is highly dependent on prior knowledge about the data.
+      Can certain features be expected in the data? Examples for this would be stationary nature, as well as global trends or patterns.
+      The more prior assumption we can make, the better the resulting model.
+      When choosing the best kernel combinations, we can use all methods that preserve the finitely positive semi-definiteness property of a kernel.
+      The most common kernels would be addition and multiplication, however there are more uncommon methods such as concatenation or composition with a function.
+    </p>
+    <p>
+      Let's consider two kernels, a linear kernel <d-math>k_{\text{lin}}</d-math> and a periodic kernel <d-math>k_{\text{per}}</d-math>, for example.
+      This is how we would multiply the two:
     </p>
 
     <d-math block>
-        k^{\ast}(t,t') = k_{\text{rbf}}(t,t') \cdot k_{\text{per}}(t,t')
+        k^{\ast}(t,t') = k_{\text{lin}}(t,t') \cdot k_{\text{per}}(t,t')
     </d-math>
+
+  <p>
+    Combining kernels might retain qualitative features of the individual kernels.
+    For example, when adding a periodic and a linear kernel, the global trend of the linear kernel is incorporated into the combined kernel.
+    The result is a periodic function that follows a linear trend.
+    When combining the same kernels through multiplication instead, the result is a periodic function with a linearly growing amplitude away from linear kernel parameter <d-math>c</d-math>.
+  </p>
+
+  <figure class="l-middle-outset">
+    <d-figure id="KernelCombinationsStatic">
+    </d-figure>
+    </d-figure>
+    <figcaption>
+      If we draw samples from a combined linear and periodic kernel, we can observe the different retained characteristics in the new sample.
+      Addition results in a periodic function with a global trend, while the multiplication increases the periodic amplitude outwards.
+    </figcaption>
+  </figure>
     
     <p>
-      In the <a href="#KernelCombinations">figure below</a>, the original training data has an ascending trend with a periodic deviation.
+      In the <a href="#KernelCombinations">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
       Using only a linear kernel, it is possible to achieve a normal linear regression of the points.
-      At first sight the RBF kernel accurately approximates the points.
+      At first glance the RBF kernel accurately approximates the points.
       But since the RBF kernel is stationary it will always return to <d-math>\mu=0</d-math> in regions further away from observed training data.
       This decreases the accuracy for predictions that reach further into the past or the future.
-      Only by using a combination of kernels, both the periodic nature and the non-zero mean trend of the data is maintained.
+      An improved model can be created by combining the individual kernels through addition, which maintains both the periodic nature and the global ascending trend of the data.
       This procedure can be used, for example, in the analysis of weather data.
     </p>
 
@@ -493,7 +516,7 @@
     </figure>
 
 
-    <h2>Conclusion</h2>
+  <h2>Conclusion</h2>
     <p>
       With this article, you should have obtained an overview of Gaussian processes, and developed a deeper
       understanding on how they work.
