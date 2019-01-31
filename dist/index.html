@@ -144,21 +144,23 @@
     <d-figure id="Multivariate"></d-figure>
     </figure>
     
-    <p>Gaussian distributions are widely used to model the real world: either as a surrogate when the original
-    distributions are unknown, or in the context of the <i>central limit theorem</i><d-footnote>One of the implications of this theorem is that a collection of independent, identically distributed
-      random variables with finite variance are together distributed normally. A good introduction to the central limit
-      theorem is given by <a
-        href="https://www.khanacademy.org/math/ap-statistics/sampling-distribution-ap/sampling-distribution-mean/v/central-limit-theorem"
-        target="_blank">this video</a> from <a href="https://www.khanacademy.org" target="_blank">Khan Academy</a>.
-    </d-footnote>.
-    In the next section we will take a closer look at how to manipulate Gaussian distributions and extract useful information from them.
+    <p>
+      Gaussian distributions are widely used to model the real world.
+      For example, we can employ them to describe errors of measurements or phenomena under the assumptions of the <i>central limit theorem</i>
+      <d-footnote>
+        One of the implications of this theorem is that a collection of independent, identically distributed random variables with finite variance are together distributed normally.
+        A good introduction to the central limit theorem is given by <a
+          href="https://www.khanacademy.org/math/ap-statistics/sampling-distribution-ap/sampling-distribution-mean/v/central-limit-theorem"
+          target="_blank">this video</a> from <a href="https://www.khanacademy.org" target="_blank">Khan Academy</a>.
+      </d-footnote>.
+      In the next section we will take a closer look at how to manipulate Gaussian distributions and extract useful information from them.
     </p>
 
     <h3 id="MargCond">Marginalization and Conditioning</h3>
-  <p>Gaussian distributions have the nice algebraic property of being closed under
-    conditioning and marginalization. This means that the resulting distributions from these operations are also
-    Gaussian, which makes many problems in statistics and machine learning tractable. In the following we will take a
-    closer look at both of these operations, as they are the foundation for Gaussian processes.
+  <p>
+    Gaussian distributions have the nice algebraic property of being closed under conditioning and marginalization.
+    Being closed under conditioning and marginalization means that the resulting distributions from these operations are also Gaussian, which makes many problems in statistics and machine learning tractable.
+    In the following we will take a closer look at both of these operations, as they are the foundation for Gaussian processes.
   </p>
 
     <p><i>Marginalization</i> and <i>conditioning</i> both work on subsets of the original distribution and we will use the following notation:</p>
@@ -176,7 +178,10 @@
       \end{aligned}
     </d-math> 
 
-    <p>The interpretation of this equation is straight forward: each partition <d-math>X</d-math> and <d-math>Y</d-math> only depends on its corresponding entries in <d-math>\mu</d-math> and <d-math>\Sigma</d-math>. To marginalize out a random variable from a Gaussian distribution we can simply drop the variables from <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.</p>
+    <p>
+      The interpretation of this equation is that each partition <d-math>X</d-math> and <d-math>Y</d-math> only depends on its corresponding entries in <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.
+      To marginalize out a random variable from a Gaussian distribution we can simply drop the variables from <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.
+    </p>
 
     <d-math block>
         p_X(x) = \int_y p_{X,Y}(x,y)dy = \int_y p_{X|Y}(x|y) p_Y(y) dy
