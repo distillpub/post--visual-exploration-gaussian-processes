@@ -499,13 +499,20 @@
       understanding on how they work.
       As we have seen, Gaussian processes offer a flexible framework for regression and several extensions exist that
       make them even more versatile.
-      If we need to deal with real-world data, we will often find measurements that are afflicted with uncertainty and
-      errors. Using Gaussian processes, we can define a kernel function that fits our data and add uncertainty to the
-      prediction.
+    </p>
 
-      For example, one particular extension to Gaussian processes from McHutchon et al.
-      <d-cite key="McHutchon2011"></d-cite>
-      , adapts Gaussian processes to be compatible to such noisy inputs.
+    <p>
+      One very important extension to highlight here is adapting Gaussian processes to noisy input data, as described by McHutchon et al.<d-cite key="McHutchon2011"></d-cite>.
+      This is highly need when we deal with real-world data, where we often find measurements that are afflicted with uncertainty and errors.
+      In this article, we have only considered Gaussian processes that have uncertainty in the output, which is reflected in the confidence interval of the prediction.
+      The above mentioned extension introduces an error model for the input data:
+      Instead of interpreting the test points <d-math>X</d-math> as fixed, we can add an error term <d-math>\epsilon \sim \mathcal{N}(0, \Sigma_{\epsilon})</d-math> to each observation:
+      <d-math block>
+        X' = X + \epsilon
+      </d-math>
+      Their model assumes that the error of each input dimension is independently corrupted with a Gaussian noise, therefore <d-math>\Sigma_{\epsilon}</d-math> is a diagonal matrix.
+      In this case, <d-math>\epsilon</d-math> is a hyperparameter that needs to be estimated from the input data.
+      This is done by maximalization of the <i>marginal likelihood</i> &mdash; but the details for this go too far for this article.
     </p>
 
     <p>
