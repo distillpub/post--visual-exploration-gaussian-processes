@@ -1,8 +1,6 @@
-<svg>
-  {#each ellipses as e}
-  <ellipse cx="{e.cx}" cy="{e.cy}" rx="{e.rx}" ry="{e.ry}" fill="{e.color}" transform="rotate({e.rotation} {e.cx} {e.cy})"/>
-  {/each}
-</svg>
+{#each radii as r, idx}
+<ellipse rx="{r.x}" ry="{r.y}" fill="{color(idx)}" {transform} vector-effect="non-scaling-stroke" />
+{/each}
 
 <script>
   // Computing the ellipses according to:
@@ -10,55 +8,47 @@
   import * as gauss from '../gaussian';
   import * as d3 from 'd3'; 
   import {Context} from './util/context';
-
-
-  const colorScale = d3.scaleSequential(d3.interpolateRdPu).domain([0, 0.2]);
-  const intervals = d3.range(0.1, 6, 0.2);
+  import * as m from 'ml-matrix';
 
   export default {
-
+    namespace: 'svg',
     data() {
       return {
-        context: new Context(300, 300, [-2, 2], [-2, 2]),
+        context: new Context(300, 300, [-4, 4], [-4, 4]),
         gaussian: new gauss.Gaussian([0,0], [[1,0.7],[0.7,2]]),
+        contours: [
+          Math.sqrt(4.61),
+          Math.sqrt(3.22),
+          Math.sqrt(2.41),
+          Math.sqrt(1.83),
+          Math.sqrt(1.39),
+          Math.sqrt(1.02),
+          Math.sqrt(0.731),
+          Math.sqrt(0.446),
+          Math.sqrt(0.211)],
       };
     },
     computed: {
-      ellipses: ({ gaussian, context }) => {
-        // Taken from: https://math.stackexchange.com/q/395698
-        const b = gaussian.cov.get(0,1);
-        const c = gaussian.cov.get(1,0);
-        if (b === 0 && c == 0) {
-          return 0;
-        }
-        const a = gaussian.cov.get(0,0);
-        const d = gaussian.cov.get(1,1);
-
-        const trace = a + d;
-        const det = (a * d) - (c * b);
-
-        // Compute the eigenvalues (radii)
-        const L1 = trace / 2 + Math.sqrt(((trace*trace) / 4) - det);
-        const L2 = trace / 2 - Math.sqrt(((trace*trace) / 4) - det);
-
-        // Choose the largest eigenvalue
-        const v = (L1 >= L2) ? [(L1-det), c] : [(L2-det), c];
-        const angle = -(Math.atan(v[1]/v[0])) * 180 / Math.PI;
-
-        return intervals.map(i => {
-          const rx = Math.sqrt(i * L1);
-          const ry = Math.sqrt(i * L2);
-          const color = gaussian.at([rx, ry]);
-          return {
-            cx: context.u(gaussian.mean.get(0,0)),
-            cy: context.v(gaussian.mean.get(1,0)),
-            rx: context.u(rx)-context.u(0),
-            ry: context.v(-ry)-context.v(0),
-            color: colorScale(color),
-            rotation: angle
-          };
-        }).reverse();
-      } 
+      transform: ({ gaussian, context }) => {
+        const e = new m.EigenvalueDecomposition(gaussian.cov);
+        const r = e.eigenvectorMatrix;
+        const [sx, sy] = e.realEigenvalues.map(x => Math.sqrt(x));
+        const [mx, my] = gaussian.getMean();
+        const a = r.get(0,0) * sx;
+        const b = r.get(1,0) * sx;
+        const c = r.get(0,1) * sy;
+        const d = r.get(1,1) * sy;
+        return `matrix(${a},${-b},${-c},${d},${context.u(mx)},${context.v(my)})`;
+      },
+      radii: ({ context, contours }) => {
+        return contours.map(c => ({
+          x: context.u(c) - context.u(0),
+          y: context.v(0) - context.v(c),
+        }));
+      },
+      color: ({ contours }) => {
+        return d3.scaleSequential(d3.interpolateRdPu).domain([0, contours.length - 1]);
+      },
     }
   };
 </script>
