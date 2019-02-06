@@ -13,6 +13,7 @@
           <text x="{context.width - 42}" y="{toV(context, 2)-5}" class="annotation">μ + 2σ</text>
           <line class="sdLine" x1="0" y1="{toV(context, -2)}" x2="{context.width}" y2="{toV(context, -2)}"/>
           <text x="{context.width - 42}" y="{toV(context, -2)-5}" class="annotation">μ - 2σ</text>
+          </line>
       </g>
       <g>
         {#each trainingPoints as pt, idx}
@@ -92,11 +93,6 @@
     margin: 1em;
   }
 
-  /*ref:mean {
-    fill: none;
-    stroke: rgba(0,0,0,0.2);
-    stroke-width: 2px;
-  }*/
 
   ref:zero {
     stroke: rgba(0,0,0,0.2);
@@ -110,31 +106,7 @@
     stroke-dasharray: 4;
   }
 
-  .line {
-    fill: none;
-    stroke: #c51b8a;
-    stroke-width: 2px;
-  }
-
-
   .trainingPoint {
-  }
-
-  .sdArea {
-
-  }
-
-  .inactive {
-    fill: transparent;
-    stroke: rgba(0, 0, 0, 0.4);
-    stroke-dasharray: 2;
-    stroke-width: 2px;
-  }
-
-  .active {
-    fill: transparent;
-    stroke: rgba(0, 0, 0, 0.4);
-    stroke-width: 2px;
   }
 </style>
 
