@@ -81,8 +81,8 @@
           const y = context.y(clamp(d3.event.y, 10, context.height - 10));
           eig.e2 = { x: x, y: y, };
           eig.e1 = {
-            x: (-y * Math.sqrt(k)) / magnitude([x, y]),
-            y: (x  * Math.sqrt(k)) / magnitude([x, y])
+            x: (y * Math.sqrt(k)) / magnitude([x, y]),
+            y: (-x  * Math.sqrt(k)) / magnitude([x, y])
           };
           this.set({ eig });
         }));
