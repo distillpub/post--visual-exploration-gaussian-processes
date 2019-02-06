@@ -237,10 +237,31 @@
     <p>
       First, we will move from the continuous view to the discrete representation of a function:
       rather than finding an implicit function, we are interested in predicting the function values at concrete points, which we call <i>test points</i> <d-math>X</d-math>.
-      Respectively, we will denote the <i>training data</i> as <d-math>Y</d-math>.
-      Now, the key idea behind Gaussian processes is that all function values stem from a multivariate Gaussian distribution. 
+      So how do we derive this functional view from the multivariate normal distributions which we have considered so far?
+      Stochastic processes, such as Gaussian processes, are essentially a set of random variables.
+      In addition, each of these random variables has a corresponding index <d-math>i</d-math>.
+      We will use this index to refer to the <d-math>i</d-math>-th dimension of our <d-math>n</d-math>-dimensional multivariate distributions. 
+      The <a href="#DimensionSwap">following figure</a> shows an example of this for two dimensions:
+    </p>
+
+    <figure class="l-middle-outset">
+      <d-figure id="DimensionSwap"></d-figure>
+      <figcaption>
+        Here, we have a two-dimensional normal distribution.
+        Each dimension is assigned an index <d-math>x_i</d-math> with <d-math>i \in \{1,2\}</d-math>.
+        You can drag the handles to see how a particular sample (left) corresponds to functional values (right).
+        This representation also allows us to understand the connection between the covariance and the resulting values:
+        the underlying Gaussian distribution has a positive covariance between <d-math>x_1</d-math> and <d-math>x_2</d-math> &mdash; this means that <d-math>x_2</d-math> will increases as <d-math>x_1</d-math> gets larger and vice versa.
+        You can also drag the handles in the figure to the right and observe the probability of such a configuration in the figure to the left.
+      </figcaption>
+    </figure>
+
+    <p>
+      Now, the goal of Gaussian processes is to learn this underlying distribution from <i>training data</i>.
+      Respective to the test data <d-math>X</d-math>, we will denote the training data as <d-math>Y</d-math>.
+      As we have mentioned before, the key idea of Gaussian processes is to model the underlying distribution of <d-math>X</d-math> together with <d-math>Y</d-math> as a multivariate normal distribution.
       That means that the joint probability distribution <d-math>P_{X,Y}</d-math> spans the space of possible function values for the function that we want to predict.
-      And this joint distribution of test and training data has <d-math>|X| + |Y|</d-math> dimensions.
+      Please note that this joint distribution of test and training data has <d-math>|X| + |Y|</d-math> dimensions.
     </p>
 
     <p>
