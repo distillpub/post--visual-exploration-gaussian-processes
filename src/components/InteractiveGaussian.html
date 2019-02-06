@@ -35,10 +35,10 @@
   export default {
     components: { GaussianContours: './GaussianContours.html' },
     data() {
-        const gaussian = new gauss.Gaussian([0,0], [[1,0],[0,2]]);
-        const e = new m.EigenvalueDecomposition(gaussian.cov);
-        const l1 = Math.sqrt(e.realEigenvalues[0]);
-        const l2 = Math.sqrt(e.realEigenvalues[1]);
+      const gaussian = new gauss.Gaussian([0,0], [[1,0],[0,2]]);
+      const e = new m.EigenvalueDecomposition(gaussian.cov);
+      const l1 = Math.sqrt(e.realEigenvalues[0]);
+      const l2 = Math.sqrt(e.realEigenvalues[1]);
       return {
         eig: { e1: {
           x: e.eigenvectorMatrix.get(0,0) * l1,
