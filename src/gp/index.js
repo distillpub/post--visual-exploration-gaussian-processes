@@ -34,7 +34,7 @@ export function combineKernelsMultiplication(kernels) {
 export function combineKernelsAddition(kernels) {
   return (x1, x2) => {
     const results = kernels.map(k => k.apply(null, [x1, x2]));
-    return results.reduce((acc, x) => acc * x, 1);
+    return results.reduce((acc, x) => acc + x, 1);
   };
 }
 

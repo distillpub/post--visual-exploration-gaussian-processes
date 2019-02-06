@@ -73,7 +73,7 @@
           yTrain = [-Math.PI/2 , Math.PI/2];
         } else {
           xTrain = [-Math.PI*2, -Math.PI , 0, Math.PI, Math.PI*2 ];
-          yTrain = xTrain.map(x => Math.sin(Math.PI *0.2* x) + 0.5 * x);
+          yTrain = xTrain.map(x => Math.sin(Math.PI *0.5* x) + 0.5 * x);
         }
 
         const result = xTrain.map((_d, i) => ({

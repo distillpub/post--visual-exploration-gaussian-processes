@@ -2,8 +2,9 @@
   {#each kernels as k,i}
   <div class="grid-item">
     <PriorSample kernel={k} name ={names} id = {i}/>
-    <text x="0" y="195" class="annotation">
-    </text>
+      <label class="annotation" font-weight="bold">
+        {names[i]}
+      </label>
   </div>
   {/each}
 </div>
