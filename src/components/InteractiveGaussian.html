@@ -1,16 +1,14 @@
 <svg width="{context.width}" height="{context.height}">
-  <GaussianContours width="{context.width}" height="{context.height}" context="{context}" gaussian="{gaussian}" />
-  <line class="link" x1="{covPos[0]}" y1="{covPos[1]}" x2="{meanPos[0]}" y2="{meanPos[1]}" />
-  <line class="link" x1="{sigma1Pos[0]}" y1="{sigma1Pos[1]}" x2="{meanPos[0]}" y2="{meanPos[1]}" />
-  <line class="link" x1="{sigma2Pos[0]}" y1="{sigma2Pos[1]}" x2="{meanPos[0]}" y2="{meanPos[1]}" />
-  <circle class="handle" ref:sigma1 cx="{sigma1Pos[0]}" cy="{sigma1Pos[1]}" r="4"/>
-  <circle class="handle" ref:sigma2 cx="{sigma2Pos[0]}" cy="{sigma2Pos[1]}" r="4"/>
-  <circle class="handle" ref:cov cx="{covPos[0]}" cy="{covPos[1]}" r="4"/>
+  <GaussianContours width="{context.width}" height="{context.height}" {context} {gaussian} />
+  <circle class="handle" ref:e1 cx={context.u(eig.e1.x)} cy={context.v(eig.e1.y)} r="4" />
+  <circle class="handle" ref:e2 cx={context.u(eig.e2.x)} cy={context.v(eig.e2.y)} r="4" />
+  <line x1={context.u(gaussian.mean[0])} y1={context.v(gaussian.mean[1])} x2={context.u(eig.e1.x)} y2={context.v(eig.e1.y)} stroke="rgb(245, 181, 62)" stroke-width="2" />
+  <line x1={context.u(gaussian.mean[0])} y1={context.v(gaussian.mean[1])} x2={context.u(eig.e2.x)} y2={context.v(eig.e2.y)} stroke="rgb(245, 181, 62)" stroke-width="2" />
 </svg>
 
 <style>
   .handle {
-    fill: rgba(0,0,0,0.2);
+    fill: rgb(245, 181, 62);
   }
 
   .handle:hover {
@@ -26,60 +24,67 @@
 </style>
 
 <script>
-  import GaussianContours from './GaussianContours.html';
   import * as gauss from '../gaussian';
   import * as d3 from 'd3';
+  import * as m from 'ml-matrix';
   import {Context} from './util/context';
   import {clamp} from './util/limit';
 
+  const magnitude = v => Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+
   export default {
-    components: { GaussianContours },
+    components: { GaussianContours: './GaussianContours.html' },
     data() {
+      const gaussian = new gauss.Gaussian([0,0], [[1,0],[0,2]]);
+      const e = new m.EigenvalueDecomposition(gaussian.cov);
+      const l1 = Math.sqrt(e.realEigenvalues[0]);
+      const l2 = Math.sqrt(e.realEigenvalues[1]);
       return {
-        limits: {
-          sigma1: {from: 0.6, to: 1.8},
-          sigma2: {from: 0.6, to: 1.8},
-          cov: {from: -0.8, to: 0.8}
+        eig: { e1: {
+          x: e.eigenvectorMatrix.get(0,0) * l1,
+          y: e.eigenvectorMatrix.get(1,0) * l1,
         },
-        mean: [0, 0],
-        sigma1: 1,
-        sigma2: 1,
-        cov: 0.9,
-        context: new Context(300, 300, [-2, 2], [-2, 2]),
+        e2: {
+          x: e.eigenvectorMatrix.get(0,1) * l2,
+          y: e.eigenvectorMatrix.get(1,1) * l2
+        }},
+        mean: gaussian.mean,
+        context: new Context(300, 300, [-3, 3], [-3, 3]),
       };
     },
     computed: {
-      meanPos: ({ context, mean }) => [context.u(mean[0]), context.v(mean[1])],
-      sigma1Pos: ({ context, mean, sigma1 }) => [context.u(sigma1 + mean[0]), context.v(mean[1])],
-      sigma2Pos: ({ context, mean, sigma2 }) => [context.u(mean[0]), context.v(sigma2 + mean[1])],
-      covPos: ({ context, mean, cov }) => [context.u(mean[0]), context.v(mean[1] - cov)],
-      gaussian: ({ mean, sigma1, sigma2, cov }) => {
-        return new gauss.Gaussian([mean[0],mean[1]], [[sigma1,cov],[cov,sigma2]]);
+      gaussian: ({ eig, mean }) => {
+        const T = new m.Matrix([[eig.e1.x, eig.e2.x], [eig.e1.y, eig.e2.y]]);
+        return new gauss.Gaussian([mean[0],mean[1]], T.mmul(T.transpose()));
       }
     },
     oncreate() {
-      // TODO: Limit movement
-      const { context, limits } = this.get();
-      d3.select(this.refs.sigma1).call(d3.drag()
+      d3.select(this.refs.e1).call(d3.drag()
         .on('drag', () => {
-          let { sigma1 } = this.get();
-          sigma1 = clamp(context.x(d3.event.x), limits.sigma1.from, limits.sigma1.to);
-          this.set({ sigma1 });
+          const { context, eig } = this.get();
+          const k = (eig.e2.x)*(eig.e2.x)+(eig.e2.y)*(eig.e2.y);
+          const x = context.x(clamp(d3.event.x, 10, context.width - 10));
+          const y = context.y(clamp(d3.event.y, 10, context.height - 10));
+          eig.e1 = { x: x, y: y, };
+          eig.e2 = {
+            x: (-y * Math.sqrt(k)) / magnitude([x, y]),
+            y: (x  * Math.sqrt(k)) / magnitude([x, y])
+          };
+          this.set({ eig });
         }));
 
-      d3.select(this.refs.sigma2).call(d3.drag()
+      d3.select(this.refs.e2).call(d3.drag()
         .on('drag', () => {
-          let { sigma2 } = this.get();
-          sigma2 = clamp(context.y(d3.event.y), limits.sigma2.from, limits.sigma2.to);
-          this.set({ sigma2 });
-        }));
-
-      d3.select(this.refs.cov).call(d3.drag()
-        .on('drag', () => {
-          let { cov } = this.get();
-          // TODO: Make more intuitive
-          cov = clamp(-context.y(d3.event.y), limits.cov.from, limits.cov.to);
-          this.set({ cov });
+          const { context, eig } = this.get();
+          const k = (eig.e1.x)*(eig.e1.x)+(eig.e1.y)*(eig.e1.y);
+          const x = context.x(clamp(d3.event.x, 10, context.width - 10));
+          const y = context.y(clamp(d3.event.y, 10, context.height - 10));
+          eig.e2 = { x: x, y: y, };
+          eig.e1 = {
+            x: (y * Math.sqrt(k)) / magnitude([x, y]),
+            y: (-x  * Math.sqrt(k)) / magnitude([x, y])
+          };
+          this.set({ eig });
         }));
     }
   };
