@@ -1,0 +1,128 @@
+<svg ref:svgArea class="plot" width="{context.width}" height="{context.height}">
+  <g ref:graph>
+    <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
+    <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}">
+      </line>
+  </g>
+</svg>
+
+<style>
+  ref:zero {
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 1px;
+  }
+</style>
+
+
+<script>
+  import * as d3 from 'd3';
+  import {Context} from './util/context';
+  import * as gp from '../gp';
+
+  export default {
+    helpers: {
+      toV(context, y) {
+        return context.v(y);
+      }
+    },
+    data() {
+      return {
+        context: new Context(200, 200, [-10, 10], [-10, 10]),
+        curve: [],
+        countDimensions: 100,
+        meanCurve: [],
+        curves: [],
+        trainingPoints:[]
+      };
+    },
+
+    computed: {
+      line: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1]));
+      },
+      zero: ({ context }) => { return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1]));
+      },
+      sdPlus: ({context}) => {return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1] + 2 * d[2]));
+      },
+      sdMinus: ({context}) => {return d3.line()
+        .x(d => context.u(d[0]))
+        .y(d => context.v(d[1] - 2 * d[2]));
+      },
+      sdArea: ({context}) => {return d3.area()
+        .x(d => context.u(d[0]))
+        .y0(d => context.v(d[1] - 2 * d[2]))
+        .y1(d => context.v(d[1] + 2 * d[2]));
+      }
+    },
+
+    methods: {
+      createTrainingSet() {
+      // Create test values
+        const {name, i} = this.get();
+        let xTrain,  yTrain ;
+        if(name[i] === 'Periodic'){
+          xTrain = [-Math.PI , 0, Math.PI];
+          yTrain = xTrain.map(x => Math.sin(Math.PI *0.5* x) + 0.5 * x);
+        } else if(name[i] === 'Linear') {
+          xTrain = [-Math.PI , Math.PI];
+          yTrain = [-Math.PI/2 , Math.PI/2];
+        } else {
+          xTrain = [-Math.PI*2, -Math.PI , 0, Math.PI, Math.PI*2 ];
+          yTrain = xTrain.map(x => Math.sin(Math.PI *0.5* x) + 0.5 * x);
+        }
+
+        const result = xTrain.map((_d, i) => ({
+          x: xTrain[i],
+          y: yTrain[i],
+        }));
+        this.set({ trainingPoints:result });
+      },
+      resample(idx) {
+        this.createTrainingSet();
+        const {context, countDimensions, kernel, curves, trainingPoints} = this.get();
+
+        // creates linear spaced values
+        const N = countDimensions;
+        const [xmin, xmax] = context.xDomain();
+        const step = (xmax - xmin) / (N - 1);
+        const xs = d3.range(xmin, xmax + step, step);
+
+        // prepare training data
+        //      const trainingPoints = result;
+        const xsTrain = trainingPoints.map(p => p.x);
+        const ysTrain = trainingPoints.map(p => p.y);
+
+        const process = gp.gaussianProcess(kernel, xs, xsTrain, ysTrain);
+
+        //      const process = gp.gaussianProcess(kernel, xs);
+        const ys = process.sample();
+        const ysMean = process.getMean();
+        const sd = process.getSd();
+
+        const pts = d3.zip(xs, ys, sd);
+        const ptsMean = d3.zip(xs, ysMean, sd);
+
+        curves[idx] = pts;
+        this.set({curves: curves, meanCurve: ptsMean});
+      }
+    },
+  
+    oncreate() {
+      this.resample(0);
+      const {meanCurve, zero} = this.get();
+      const svg = d3.select(this.refs.svgArea);
+
+      svg.append('path').data([meanCurve])
+        .attr('class', 'zero')
+        .attr('fill', 'none')
+        .attr('stroke', '#c51b8a')
+        .attr('stroke-width', '2px')
+        .attr('d', zero);
+    }
+  };
+</script>

@@ -24,10 +24,17 @@ export function linear(sigma = 1, sigmaB = 0, c = 0) {
   };
 }
 
-export function combineKernels(kernels) {
+export function combineKernelsMultiplication(kernels) {
   return (x1, x2) => {
     const results = kernels.map(k => k.apply(null, [x1, x2]));
     return results.reduce((acc, x) => acc * x, 1);
+  };
+}
+
+export function combineKernelsAddition(kernels) {
+  return (x1, x2) => {
+    const results = kernels.map(k => k.apply(null, [x1, x2]));
+    return results.reduce((acc, x) => acc + x, 1);
   };
 }
 
