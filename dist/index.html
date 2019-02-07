@@ -165,7 +165,7 @@
 
     <p><i>Marginalization</i> and <i>conditioning</i> both work on subsets of the original distribution and we will use the following notation:</p>
 
-    <d-math block>\begin{bmatrix} X \\ Y \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma) = \mathcal{N} \left( \begin{bmatrix} \mu_X \\ \mu_Y \end{bmatrix}, \begin{bmatrix} \Sigma_{XX} \, \Sigma_{XY} \\ \Sigma_{YX} \, \Sigma_{YY} \end{bmatrix} \right)</d-math>
+    <d-math block>P_{X,Y} = \begin{bmatrix} X \\ Y \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma) = \mathcal{N} \left( \begin{bmatrix} \mu_X \\ \mu_Y \end{bmatrix}, \begin{bmatrix} \Sigma_{XX} \, \Sigma_{XY} \\ \Sigma_{YX} \, \Sigma_{YY} \end{bmatrix} \right)</d-math>
 
     <p>With <d-math>X</d-math> and <d-math>Y</d-math> representing subsets of original random variables.</p>
 
@@ -430,6 +430,27 @@
     </figure>
 
     <p>
+       As mentioned before, the conditional distribution <d-math>P_{X|Y}</d-math> forces the set of functions to precisely pass through each training point.
+       In many cases this can lead to fitted functions that are unnecessary complex.
+       Also, up until now, we have considered the training points <d-math>Y</d-math> to be perfect measurements.
+       But in real-world scenarios this is an unrealistic assumption, since most of our data is afflicted with measurement errors.
+       Gaussian processes offer a simple solution to this problem by modeling the error of the measurements.
+       For this, we need to add an error term <d-math>\epsilon \sim \mathcal{N}(0, \psi^2)</d-math> to each of our training points:
+    </p>
+    <d-math block>
+       Y = f(X) + \epsilon
+    </d-math>
+    <p>
+       We do this by slightly modifying the setup of the joint distribution <d-math>P_{X,Y}</d-math>:
+    </p>
+
+    <d-math block>P_{X,Y} = \begin{bmatrix} X \\ Y \end{bmatrix} \sim \mathcal{N}(0, \Sigma) = \mathcal{N} \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} \Sigma_{XX} & \Sigma_{XY} \\ \Sigma_{YX} & \Sigma_{YY}+\psi^2I \end{bmatrix} \right)</d-math>
+    <p>
+      Again, we can use conditioning to derive the predictive distribution <d-math>P_{X|Y}</d-math>.
+      In this formulation, <d-math>\psi</d-math> is an additional parameter of our model.
+    </p>
+
+    <p>
       Analogous to the prior distribution, we could obtain a prediction by sampling from this distribution.
       But, since sampling involves randomness, we would have no guarantee that the result is a good fit to the data.
       In order to make a better prediction we can use the other basic operation of Gaussian distributions.
@@ -550,27 +571,12 @@
     </p>
 
     <p>
-      One very important extension to highlight here is adapting Gaussian processes to noisy input data, as described by McHutchon et al.<d-cite key="McHutchon2011"></d-cite>.
-      This is highly need when we deal with real-world data, where we often find measurements that are afflicted with uncertainty and errors.
-      In this article, we have only considered Gaussian processes that have uncertainty in the output, which is reflected in the confidence interval of the prediction.
-      The above mentioned extension introduces an error model for the input data:
-      Instead of interpreting the test points <d-math>X</d-math> as fixed, we can add an error term <d-math>\epsilon \sim \mathcal{N}(0, \Sigma_{\epsilon})</d-math> to each observation:
-      <d-math block>
-        X' = X + \epsilon
-      </d-math>
-      Their model assumes that the error of each input dimension is independently corrupted with a Gaussian noise, therefore <d-math>\Sigma_{\epsilon}</d-math> is a diagonal matrix.
-      In this case, <d-math>\epsilon</d-math> is a hyperparameter that needs to be estimated from the input data.
-      This is done by maximalization of the <i>marginal likelihood</i> &mdash; but the details for this go too far for this article.
-    </p>
-
-    <p>
+      As this might not be possible in many cases, learning specialized kernel functions from the underlying data using deep learning <d-cite key="Hinton2008,Wilson2016"></d-cite> is an area of ongoing research.
+      Furthermore, links between Bayesian inference, Gaussian processes and deep learning have been described in several papers<d-cite key="Lee2018,Damianou2013"></d-cite>.
       Even though we mostly talk about Gaussian processes in the context of regression, they can be adapted for
       different purposes, e.g. <i>model-peeling</i> and hypothesis testing.
       By comparing different kernels on the dataset, domain experts can introduce additional knowledge through
       appropriate combination and parameterization of the kernel.
-
-      As this might not be possible in many cases, learning specialized kernel functions from the underlying data using deep learning <d-cite key="Hinton2008,Wilson2016"></d-cite> is an area of ongoing research.
-      Furthermore, links between Bayesian inference, Gaussian processes and deep learning have been described in several papers<d-cite key="Lee2018,Damianou2013"></d-cite>.
     </p>
 
   <p>
