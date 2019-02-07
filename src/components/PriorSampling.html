@@ -15,9 +15,8 @@
     {/each}
     </g>
     <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
-    <!--<text x="{context.width - 14}" y="{toV(context, 0)-5}" class="annotation">μ</text>-->
-    <!--<text x="{context.width - 42}" y="{toV(context, 2)-5}" class="annotation">μ + 2σ</text>-->
-    <!--<text x="{context.width - 42}" y="{toV(context, -2)-5}" class="annotation">μ - 2σ</text>-->
+    <text ref:plus x="{5}" y="{toV(context,2)-10}" class="annotation">μ + 2σ</text>
+    <text ref:minus x="{5}" y="{toV(context,-2)+15}" class="annotation">μ - 2σ</text>
     {#if active}
     <text x="5" y ="15" class="annotation"><tspan fill="rgb(245, 181, 62)" font-style="italic">(click to pause)</tspan></text>
     {:else}
@@ -253,6 +252,9 @@
       svg.select('.sdArea').transition().duration(750).attr('d', current.sdArea(current.meanCurve));
       svg.select('.sdPlus').transition().duration(750).attr('d', current.sdPlus(current.meanCurve));
       svg.select('.sdMinus').transition().duration(750).attr('d', current.sdMinus(current.meanCurve));
+
+      d3.select(this.refs.plus).transition().duration(750).attr('y', current.context.v(current.params[0].value*2)-10);
+      d3.select(this.refs.minus).transition().duration(750).attr('y', current.context.v(-current.params[0].value*2)+15);
     },
 
     oncreate() {

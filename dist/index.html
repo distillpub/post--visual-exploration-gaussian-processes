@@ -97,7 +97,7 @@
     They allow us to make predictions about our data by incorporating prior knowledge.
     Their most obvious area of application is <i>fitting</i> a function to the data.
     This is called regression and is used, for example, in robotics or time series forecasting.
-    But Gaussian processes are not limited to regression &mdash; they can also be extended to classification and clustering tasks<d-cite key="Kapoor2010, Kim2007"></d-cite>.
+    But Gaussian processes are not limited to regression &mdash; they can also be extended to classification and clustering tasks<d-cite key="Kapoor2010"></d-cite><d-cite key="Kim2007"></d-cite>.
 
     For a given set of training points, there are potentially infinitely many functions that fit the data.
     Gaussian processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>.
@@ -276,7 +276,7 @@
     <p>
       Now that we have the basic framework of Gaussian processes together, there is only one thing missing:
       how do we set up this distribution and define the mean <d-math>\mu</d-math> and the covariance matrix <d-math>\Sigma</d-math>?
-      For this we will use what is called a <i>kernel</i> <d-math>k</d-math>.
+      The covariance matrix <d-math>\Sigma</d-math> is determined by its <i>covariance function</i> <d-math>k</d-math>, which is often also called the <i>kernel</i> of the Gaussian process.
       We will talk about this in detail in the next section.
       But before we come to this, let us reflect on how we can use multivariate Gaussian distributions to estimate function values.
       The <a href="#PriorFigure">following figure</a> shows an example of this using ten test points at which we want to predict our function:

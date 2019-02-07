@@ -4,14 +4,6 @@
       <!--<svg width="{context.width}" height="{context.height*2}">-->
       <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}" on:click="resample(0)">
         <g ref:graph>
-          <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
-          <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}"></line>
-          <!--<line ref:mean x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}" />-->
-          <!--<text x="{context.width - 14}" y="{toV(context, 0)-5}" class="annotation">μ</text>-->
-          <!--<line class="sdLine" x1="0" y1="{toV(context, 2)}" x2="{context.width}" y2="{toV(context, 2)}"/>-->
-          <!--<text x="{context.width - 42}" y="{toV(context, 2)-5}" class="annotation">μ + 2σ</text>-->
-          <!--<line class="sdLine" x1="0" y1="{toV(context, -2)}" x2="{context.width}" y2="{toV(context, -2)}"/>-->
-          <!--<text x="{context.width - 42}" y="{toV(context, -2)-5}" class="annotation">μ - 2σ</text>-->
         </g>
         <g>
           {#each trainingPoints as pt, idx}
@@ -23,6 +15,14 @@
                   cx="{toU(context, pt.x)}" cy="{toV(context, pt.y)}" r="6"/>
           {/each}
         </g>
+        <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
+        <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}"></line>
+        <line ref:mean x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}" />
+        <!--<text x="{context.width - 14}" y="{toV(context, 0)-5}" class="annotation">μ</text>-->
+        <!--<line class="sdLine" x1="0" y1="{toV(context, 2)}" x2="{context.width}" y2="{toV(context, 2)}"/>-->
+        <text x="{5}" y="{toV(context, 2)-10}" class="annotation">μ + 2σ</text>
+        <!--<line class="sdLine" x1="0" y1="{toV(context, -2)}" x2="{context.width}" y2="{toV(context, -2)}"/>-->
+        <text x="{5}" y="{toV(context, -2)+15}" class="annotation">μ - 2σ</text>
         <text x={5} y={context.height-5} class="annotation">
           <tspan fill="rgb(245, 181, 62)" font-style="italic">(click to resample)</tspan>
         </text>
