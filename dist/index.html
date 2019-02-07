@@ -87,50 +87,46 @@
 <d-article>
     <h3>This article was presented at <a href="http://visxai.io/" target="_blank">VISxAI</a>, it is now under review at <a href="https://distill.pub/" target="_blank">distill.pub</a>.</h3>
     <h2>Introduction</h2>
-  <p>Even if you have spent some time reading about machine learning, chances are that you have never heard of Gaussian
-    processes.
+  <p>
+    Even if you have spent some time reading about machine learning, chances are that you have never heard of Gaussian processes.
     And if you have, rehearsing the basics is always a good way to refresh your memory.
-    With this blog post we want to give an introduction to Gaussian processes and make the mathematical intuition behind
-    them more approachable.
+    With this blog post we want to give an introduction to Gaussian processes and make the mathematical intuition behind them more approachable.
   </p>
-  <p>Gaussian processes are a powerful tool in the machine learning toolbox
-    <d-cite key="Rasmussen2004"></d-cite>
-    . They allow us to make predictions about our data by incorporating prior knowledge.
-    Their most obvious area of application are regression problems, for example in robotics, but they can also be
-    extended to classification and clustering tasks
-    <d-cite key="Kapoor2010, Kim2007"></d-cite>
-    . Just a quick recap: the goal of regression is to find a function that describes a given set of data points as
-    closely as possible. This process is called <i>fitting</i> a function to the data.
-    For a given set of training points, there are potentially infinitely many functions that fit the data. Gaussian
-    processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>. The mean
-    of this probability distribution then represents the most probable characterization of the data. Furthermore,
-    using a probabilistic approach allows us to incorporate the confidence of the prediction into the regression result.
+  <p>
+    Gaussian processes are a powerful tool in the machine learning toolbox<d-cite key="Rasmussen2004"></d-cite>.
+    They allow us to make predictions about our data by incorporating prior knowledge.
+    Their most obvious area of application is <i>fitting</i> a function to the data.
+    This is called regression and is used, for example, in robotics or time series forecasting.
+    But Gaussian processes are not limited to regression &mdash; they can also be extended to classification and clustering tasks<d-cite key="Kapoor2010, Kim2007"></d-cite>.
+
+    For a given set of training points, there are potentially infinitely many functions that fit the data.
+    Gaussian processes offer an elegant solution to this problem by assigning a probability to each of these functions<d-cite key="Rasmussen2004"></d-cite>.
+    The mean of this probability distribution then represents the most probable characterization of the data.
+    Furthermore, using a probabilistic approach allows us to incorporate the confidence of the prediction into the regression result.
   </p>
 
   <p>
-    We will first explore the mathematical foundation they are built on, and you can follow along using interactive
-    figures
-    and hands-on examples.
+    We will first explore the mathematical foundation they are built on, and you can follow along using interactive figures and hands-on examples.
     They help to explain the impact of individual components, and show the flexibility of Gaussian processes.
-    After following this article we hope that you will have a visual intuition on how Gaussian processes work and how
-    you can configure them for different types of data.
-
+    After following this article we hope that you will have a visual intuition on how Gaussian processes work and how you can configure them for different types of data.
   </p>
 
     <h2>Multivariate Gaussian distributions</h2>
   <p>
-    Before we can explore Gaussian processes, we need to understand the mathematical concepts they are based on. As the
-    name suggests, the Gaussian distribution (which is often also referred to as <i>normal</i> distribution) is the
-    basic building block of Gaussian processes. In particular, we are interested in the multivariate case of this
-    distribution, where each random variable is distributed normally and their joint distribution is also Gaussian. In
-    general, the multivariate Gaussian distribution is defined by a mean vector
-    <d-math>\mu</d-math>
-    and a covariance matrix
-    <d-math>\Sigma</d-math>
-    .
+    Before we can explore Gaussian processes, we need to understand the mathematical concepts they are based on.
+    As the name suggests, the Gaussian distribution (which is often also referred to as <i>normal</i> distribution) is the basic building block of Gaussian processes.
+    In particular, we are interested in the multivariate case of this distribution, where each random variable is distributed normally and their joint distribution is also Gaussian.
+    The multivariate Gaussian distribution is defined by a mean vector <d-math>\mu</d-math> and a covariance matrix <d-math>\Sigma</d-math>.
   </p>
 
-    <p>The mean vector <d-math>\mu</d-math> describes the expected value of the distribution. Each of its components describes the mean of the corresponding dimension. <d-math>\Sigma</d-math> models the variance along each dimension and determines how the different random variables are correlated. The covariance matrix is always symmetric and positive semi-definite<d-cite key="Hazewinkel1994"></d-cite>. The diagonal of <d-math>\Sigma</d-math> consists of the standard deviation <d-math>\sigma_i</d-math> of the <d-math>i</d-math>-th random variable, whereas the off-diagonal elements describe correlations between each of the components <d-math>\sigma_{ij}</d-math>.</p>
+  <p>
+    The mean vector <d-math>\mu</d-math> describes the expected value of the distribution.
+    Each of its components describes the mean of the corresponding dimension.
+    <d-math>\Sigma</d-math> models the variance along each dimension and determines how the different random variables are correlated.
+    The covariance matrix is always symmetric and positive semi-definite<d-cite key="Hazewinkel1994"></d-cite>.
+    The diagonal of <d-math>\Sigma</d-math> consists of the variance <d-math>\sigma_i^2</d-math> of the <d-math>i</d-math>-th random variable.
+    And the off-diagonal elements <d-math>\sigma_{ij}</d-math> describe the correlation between the <d-math>i</d-math>-th and <d-math>j</d-math>-th random variable.
+  </p>
 
     <d-math block>
         X = \begin{bmatrix} X_1 \\ X_2 \\ \vdots \\ X_n \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma)
@@ -148,21 +144,23 @@
     <d-figure id="Multivariate"></d-figure>
     </figure>
     
-    <p>Gaussian distributions are widely used to model the real world: either as a surrogate when the original
-    distributions are unknown, or in the context of the <i>central limit theorem</i><d-footnote>One of the implications of this theorem is that a collection of independent, identically distributed
-      random variables with finite variance are together distributed normally. A good introduction to the central limit
-      theorem is given by <a
-        href="https://www.khanacademy.org/math/ap-statistics/sampling-distribution-ap/sampling-distribution-mean/v/central-limit-theorem"
-        target="_blank">this video</a> from <a href="https://www.khanacademy.org" target="_blank">Khan Academy</a>.
-    </d-footnote>.
-    In the next section we will take a closer look at how to manipulate Gaussian distributions and extract useful information from them.
+    <p>
+      Gaussian distributions are widely used to model the real world.
+      For example, we can employ them to describe errors of measurements or phenomena under the assumptions of the <i>central limit theorem</i>
+      <d-footnote>
+        One of the implications of this theorem is that a collection of independent, identically distributed random variables with finite variance are together distributed normally.
+        A good introduction to the central limit theorem is given by <a
+          href="https://www.khanacademy.org/math/ap-statistics/sampling-distribution-ap/sampling-distribution-mean/v/central-limit-theorem"
+          target="_blank">this video</a> from <a href="https://www.khanacademy.org" target="_blank">Khan Academy</a>.
+      </d-footnote>.
+      In the next section we will take a closer look at how to manipulate Gaussian distributions and extract useful information from them.
     </p>
 
     <h3 id="MargCond">Marginalization and Conditioning</h3>
-  <p>Gaussian distributions have the nice algebraic property of being closed under
-    conditioning and marginalization. This means that the resulting distributions from these operations are also
-    Gaussian, which makes many problems in statistics and machine learning tractable. In the following we will take a
-    closer look at both of these operations, as they are the foundation for Gaussian processes.
+  <p>
+    Gaussian distributions have the nice algebraic property of being closed under conditioning and marginalization.
+    Being closed under conditioning and marginalization means that the resulting distributions from these operations are also Gaussian, which makes many problems in statistics and machine learning tractable.
+    In the following we will take a closer look at both of these operations, as they are the foundation for Gaussian processes.
   </p>
 
     <p><i>Marginalization</i> and <i>conditioning</i> both work on subsets of the original distribution and we will use the following notation:</p>
@@ -180,7 +178,10 @@
       \end{aligned}
     </d-math> 
 
-    <p>The interpretation of this equation is straight forward: each partition <d-math>X</d-math> and <d-math>Y</d-math> only depends on its corresponding entries in <d-math>\mu</d-math> and <d-math>\Sigma</d-math>. To marginalize out a random variable from a Gaussian distribution we can simply drop the variables from <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.</p>
+    <p>
+      The interpretation of this equation is that each partition <d-math>X</d-math> and <d-math>Y</d-math> only depends on its corresponding entries in <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.
+      To marginalize out a random variable from a Gaussian distribution we can simply drop the variables from <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.
+    </p>
 
     <d-math block>
         p_X(x) = \int_y p_{X,Y}(x,y)dy = \int_y p_{X|Y}(x|y) p_Y(y) dy
