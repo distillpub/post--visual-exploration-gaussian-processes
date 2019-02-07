@@ -91,6 +91,14 @@
           sample = { x1: x1, x2: sample.x2 };
           this.set({ sample });
         }));
+      d3.select(this.refs.x2).call(d3.drag()
+        .on('drag', () => {
+          const { context } = this.get();
+          let { sample } = this.get();
+          const x2 = context.y(clamp(d3.event.y, 20, context.width - 20));
+          sample = { x1: sample.x1, x2: x2 };
+          this.set({ sample });
+        }));
     }
   };
 </script>
