@@ -1,0 +1,50 @@
+<div class="kernel-grid">
+  {#each kernels as k,i}
+  <div class="grid-item">
+    <PriorSample kernel={k} name ={names} id = {i}/>
+      <label class="annotation" font-weight="bold">
+        {names[i]}
+      </label>
+  </div>
+  {/each}
+</div>
+
+<style>
+  .kernel-grid {
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto;
+  }
+
+  .grid-item {
+    margin: 1em;
+  }
+</style>
+
+
+<script>
+  import PriorSample from './PriorSample.html';
+  import * as gp from '../gp';
+
+  const periodic = gp.periodic(0.8, 2.1, 2);
+  const linear = gp.linear(0.3, 0.5, 0);
+
+  const multiplication = gp.combineKernelsMultiplication([linear, periodic]);
+  const addition = gp.combineKernelsAddition([linear, periodic]);
+
+  export default {
+    components: {PriorSample},
+
+    data() {
+      return {
+        kernels: [ linear, periodic, addition, multiplication],
+        names : [
+          'Linear',
+          'Periodic',
+          'Linear + Periodic',
+          'Linear ⋅ Periodic'
+        ]
+      };
+    },
+
+  };
+</script>

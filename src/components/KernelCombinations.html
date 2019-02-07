@@ -8,12 +8,12 @@
       <g ref:graph>
         <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
         <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}">
-          <!--<line ref:mean x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}" />-->
           <text x="{context.width - 14}" y="{toV(context, 0)-5}" class="annotation">μ</text>
           <line class="sdLine" x1="0" y1="{toV(context, 2)}" x2="{context.width}" y2="{toV(context, 2)}"/>
           <text x="{context.width - 42}" y="{toV(context, 2)-5}" class="annotation">μ + 2σ</text>
           <line class="sdLine" x1="0" y1="{toV(context, -2)}" x2="{context.width}" y2="{toV(context, -2)}"/>
           <text x="{context.width - 42}" y="{toV(context, -2)-5}" class="annotation">μ - 2σ</text>
+          </line>
       </g>
       <g>
         {#each trainingPoints as pt, idx}
@@ -93,11 +93,6 @@
     margin: 1em;
   }
 
-  /*ref:mean {
-    fill: none;
-    stroke: rgba(0,0,0,0.2);
-    stroke-width: 2px;
-  }*/
 
   ref:zero {
     stroke: rgba(0,0,0,0.2);
@@ -111,18 +106,7 @@
     stroke-dasharray: 4;
   }
 
-  .line {
-    fill: none;
-    stroke: #c51b8a;
-    stroke-width: 2px;
-  }
-
-
   .trainingPoint {
-  }
-
-  .sdArea {
-
   }
 
   .inactive {
@@ -204,7 +188,7 @@
           active: false,
           params: [{
             name: 'Variance σ',
-            value: 0.3,
+            value: 0.5,
             min: 0,
             max: 1,
           }, {
@@ -271,7 +255,7 @@
         let solution = 1;
         const rbf = gp.rbf();
         const periodic = gp.periodic(1, 3, 0.8);
-        const linear = gp.linear(0.3, 0.5, 0);
+        const linear = gp.linear(0.5, 0.5, 0);
         const paramsList = [];
         const {kernels} = this.get();
         if (kernels[0].active) {
@@ -287,22 +271,22 @@
           paramsList[0] = kernels[2];
         }
         if (kernels[0].active && kernels[1].active) {
-          solution = gp.combineKernels([rbf, periodic]);
+          solution = gp.combineKernelsAddition([rbf, periodic]);
           paramsList[0] = kernels[0];
           paramsList[1] = kernels[1];
         }
         if (kernels[1].active && kernels[2].active) {
-          solution = gp.combineKernels([linear, periodic]);
+          solution = gp.combineKernelsAddition([linear, periodic]);
           paramsList[0] = kernels[1];
           paramsList[1] = kernels[2];
         }
         if (kernels[0].active && kernels[2].active) {
-          solution = gp.combineKernels([linear, rbf]);
+          solution = gp.combineKernelsAddition([linear, rbf]);
           paramsList[0] = kernels[0];
           paramsList[1] = kernels[2];
         }
         if (kernels[0].active && kernels[1].active && kernels[2].active) {
-          solution = gp.combineKernels([linear, periodic, rbf]);
+          solution = gp.combineKernelsAddition([linear, periodic, rbf]);
           paramsList[0] = kernels[0];
           paramsList[1] = kernels[1];
           paramsList[2] = kernels[2];

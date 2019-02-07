@@ -8,7 +8,7 @@
                                                                                    bind:value=p.value min='{p.min}'
                                                                                    max='{p.max}'></p>
   <input bind:value=p.value type='range' min='{p.min}' max='{p.max}' step='0.01'
-         on:change="updateSlider(p, name, this)">
+         on:input="updateSlider(p, name, this)">
 </div>
 {/each}
 {/if}

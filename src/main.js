@@ -43,6 +43,11 @@ const PosteriorComponent = new Posterior({ // eslint-disable-line no-unused-vars
   target: document.querySelector('#Posterior')
 });
 
+import KernelCombinationsStatic from './components/KernelCombinationsStatic.html';
+const KernelCombinationsStaticComponent = new KernelCombinationsStatic({ // eslint-disable-line no-unused-vars
+  target: document.querySelector('#KernelCombinationsStatic')
+});
+
 import KernelCombinations from './components/KernelCombinations.html';
 const KernelCombinationsComponent = new KernelCombinations({ // eslint-disable-line no-unused-vars
   target: document.querySelector('#KernelCombinations')
