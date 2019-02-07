@@ -51,12 +51,24 @@ export class Gaussian {
     return new Gaussian(condMean, condCov);
   }
 
+  // Uses Eigenvalue decomposition to compute t from Cov = tt^T
+  transformationMatrix() {
+    const e = new m.EigenvalueDecomposition(this.cov);
+    const r = e.eigenvectorMatrix;
+    const d = m.Matrix.zeros(r.rows, r.columns);
+    for(let i = 0; i < d.rows; ++i) {
+      d.set(i,i, Math.sqrt(e.realEigenvalues[i]));
+    }
+    return r.mmul(d);
+  }
+
   sample() {
     const z = m.Matrix.zeros(this.mean.rows, 1);
     const normal = random.normal();
     for(let i = 0; i < this.mean.rows; ++i)
       z.set(i,0,normal());
-    const samples = m.Matrix.add(this.mean, this.cov.mmul(z));
+
+    const samples = m.Matrix.add(this.mean, this.transformationMatrix().mmul(z));
     return samples;
   }
 

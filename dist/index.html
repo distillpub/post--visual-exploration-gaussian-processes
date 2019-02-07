@@ -238,10 +238,31 @@
     <p>
       First, we will move from the continuous view to the discrete representation of a function:
       rather than finding an implicit function, we are interested in predicting the function values at concrete points, which we call <i>test points</i> <d-math>X</d-math>.
-      Respectively, we will denote the <i>training data</i> as <d-math>Y</d-math>.
-      Now, the key idea behind Gaussian processes is that all function values stem from a multivariate Gaussian distribution. 
+      So how do we derive this functional view from the multivariate normal distributions which we have considered so far?
+      Stochastic processes, such as Gaussian processes, are essentially a set of random variables.
+      In addition, each of these random variables has a corresponding index <d-math>i</d-math>.
+      We will use this index to refer to the <d-math>i</d-math>-th dimension of our <d-math>n</d-math>-dimensional multivariate distributions. 
+      The <a href="#DimensionSwap">following figure</a> shows an example of this for two dimensions:
+    </p>
+
+    <figure class="l-middle-outset">
+      <d-figure id="DimensionSwap"></d-figure>
+      <figcaption>
+        Here, we have a two-dimensional normal distribution.
+        Each dimension is assigned an index <d-math>x_i</d-math> with <d-math>i \in \{1,2\}</d-math>.
+        You can drag the handles to see how a particular sample (left) corresponds to functional values (right).
+        This representation also allows us to understand the connection between the covariance and the resulting values:
+        the underlying Gaussian distribution has a positive covariance between <d-math>x_1</d-math> and <d-math>x_2</d-math> &mdash; this means that <d-math>x_2</d-math> will increases as <d-math>x_1</d-math> gets larger and vice versa.
+        You can also drag the handles in the figure to the right and observe the probability of such a configuration in the figure to the left.
+      </figcaption>
+    </figure>
+
+    <p>
+      Now, the goal of Gaussian processes is to learn this underlying distribution from <i>training data</i>.
+      Respective to the test data <d-math>X</d-math>, we will denote the training data as <d-math>Y</d-math>.
+      As we have mentioned before, the key idea of Gaussian processes is to model the underlying distribution of <d-math>X</d-math> together with <d-math>Y</d-math> as a multivariate normal distribution.
       That means that the joint probability distribution <d-math>P_{X,Y}</d-math> spans the space of possible function values for the function that we want to predict.
-      And this joint distribution of test and training data has <d-math>|X| + |Y|</d-math> dimensions.
+      Please note that this joint distribution of test and training data has <d-math>|X| + |Y|</d-math> dimensions.
     </p>
 
     <p>
@@ -500,13 +521,20 @@
       understanding on how they work.
       As we have seen, Gaussian processes offer a flexible framework for regression and several extensions exist that
       make them even more versatile.
-      If we need to deal with real-world data, we will often find measurements that are afflicted with uncertainty and
-      errors. Using Gaussian processes, we can define a kernel function that fits our data and add uncertainty to the
-      prediction.
+    </p>
 
-      For example, one particular extension to Gaussian processes from McHutchon et al.
-      <d-cite key="McHutchon2011"></d-cite>
-      , adapts Gaussian processes to be compatible to such noisy inputs.
+    <p>
+      One very important extension to highlight here is adapting Gaussian processes to noisy input data, as described by McHutchon et al.<d-cite key="McHutchon2011"></d-cite>.
+      This is highly need when we deal with real-world data, where we often find measurements that are afflicted with uncertainty and errors.
+      In this article, we have only considered Gaussian processes that have uncertainty in the output, which is reflected in the confidence interval of the prediction.
+      The above mentioned extension introduces an error model for the input data:
+      Instead of interpreting the test points <d-math>X</d-math> as fixed, we can add an error term <d-math>\epsilon \sim \mathcal{N}(0, \Sigma_{\epsilon})</d-math> to each observation:
+      <d-math block>
+        X' = X + \epsilon
+      </d-math>
+      Their model assumes that the error of each input dimension is independently corrupted with a Gaussian noise, therefore <d-math>\Sigma_{\epsilon}</d-math> is a diagonal matrix.
+      In this case, <d-math>\epsilon</d-math> is a hyperparameter that needs to be estimated from the input data.
+      This is done by maximalization of the <i>marginal likelihood</i> &mdash; but the details for this go too far for this article.
     </p>
 
     <p>
