@@ -8,7 +8,6 @@
   import * as gauss from '../gaussian';
   import * as d3 from 'd3'; 
   import {Context} from './util/context';
-  import * as m from 'ml-matrix';
 
   export default {
     namespace: 'svg',
@@ -30,14 +29,8 @@
     },
     computed: {
       transform: ({ gaussian, context }) => {
-        const e = new m.EigenvalueDecomposition(gaussian.cov);
-        const r = e.eigenvectorMatrix;
-        const [sx, sy] = e.realEigenvalues.map(x => Math.sqrt(x));
         const [mx, my] = gaussian.getMean();
-        const a = r.get(0,0) * sx;
-        const b = r.get(1,0) * sx;
-        const c = r.get(0,1) * sy;
-        const d = r.get(1,1) * sy;
+        const [[a,c], [b,d]] = gaussian.transformationMatrix();
         return `matrix(${a},${-b},${-c},${d},${context.u(mx)},${context.v(my)})`;
       },
       radii: ({ context, contours }) => {

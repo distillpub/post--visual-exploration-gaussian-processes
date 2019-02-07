@@ -8,6 +8,11 @@ const MultivariateComponent = new Multivariate({ // eslint-disable-line no-unuse
   target: document.querySelector('#Multivariate')
 });
 
+import DimensionSwap from './components/DimensionSwapFigure.html';
+const DimensionSwapComponent = new DimensionSwap({ // eslint-disable-line no-unused-vars
+  target: document.querySelector('#DimensionSwap')
+});
+
 import MarginalizationConditioning from './components/MarginalizationConditioning.html';
 const MarginalizationConditioningComponent = new MarginalizationConditioning({ // eslint-disable-line no-unused-vars
   target: document.querySelector('#MarginalizationConditioning')

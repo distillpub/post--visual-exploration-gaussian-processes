@@ -1,0 +1,104 @@
+<div class="gauss-grid">
+  <div class="grid-item">
+    <svg width="{context.width}" height="{context.height}" class="plot">
+      <GaussianContours width="{context.width}" height="{context.height}" {context} {gaussian} />
+      <text x={context.u(sample.x1) + 5} y={context.height - 5} class="annotation point">x<tspan class="ss">1</tspan></text>
+      <text x="5" y={context.v(sample.x2) - 5} class="annotation point">x<tspan class="ss">2</tspan></text>
+      <line x1="0" y1={context.v(sample.x2)} x2={context.u(sample.x1)} y2={context.v(sample.x2)} stroke="rgb(245, 181, 62)" stroke-width="2" />
+      <line x1={context.u(sample.x1)} y1={context.height} x2={context.u(sample.x1)} y2={context.v(sample.x2)} stroke="rgb(245, 181, 62)" stroke-width="2" />
+      <circle ref:xy class="handle" cx={context.u(sample.x1)} cy={context.v(sample.x2)} r="4" />
+    </svg>
+  </div>
+  <div class="grid-item">
+    <svg width="{context.width}" height="{context.height}" class="plot">
+      <text x="5" y="{context.v(0)-5}" class="annotation">μ</text>
+      <text x={context.width/3 + 5} y={context.height - 5} class="annotation point">x<tspan class="ss">1</tspan></text>
+      <text x={(context.width/3)*2 + 5} y={context.height - 5} class="annotation point">x<tspan class="ss">2</tspan></text>
+      <line ref:zero x1="0" y1="{context.v(0)}" x2="{context.width}" y2="{context.v(0)}" /> 
+      <line x1={context.width/3} y1={context.height} x2={context.width/3} y2={context.v(sample.x1)} stroke="rgb(245, 181, 62)" stroke-width="2" />
+      <line x1={(context.width/3)*2} y1={context.height} x2={(context.width/3)*2} y2={context.v(sample.x2)} stroke="rgb(245, 181, 62)" stroke-width="2" />
+      <circle ref:x1 class="handle" cx={context.width/3} cy={context.v(sample.x1)} r="4" />
+      <circle ref:x2 class="handle" cx={(context.width/3)*2} cy={context.v(sample.x2)} r="4" />
+    </svg>
+  </div>
+</div>
+
+<style>
+  ref:zero {
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 1px;
+  }
+
+  .point {
+    fill: rgb(245, 181, 62);
+  }
+
+  .ss {
+    baseline-shift: sub;
+    font-size: 11px;
+  }
+
+  .gauss-grid {
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    text-align: center;
+  }
+
+  .grid-item {
+    margin: 0.3em;
+  }
+
+  .handle {
+    fill: rgb(245, 181, 62);
+  }
+
+  .handle:hover {
+    stroke: gray;
+    stroke-width: 2px;
+  }
+</style>
+
+<script>
+  import * as d3 from 'd3';
+  import * as gauss from '../gaussian';
+  import {Context} from './util/context';
+  import {clamp} from './util/limit';
+
+  export default {
+    components: { GaussianContours: './GaussianContours.html' },
+    data() {
+      return {
+        gaussian: new gauss.Gaussian([0,0], [[1,0.5],[0.5,1]]),
+        context: new Context(200, 200, [-2, 2], [-2, 2]),
+        sample: {x1: 1, x2: 0.5},
+      };
+    },
+    oncreate() {
+      d3.select(this.refs.xy).call(d3.drag()
+        .on('drag', () => {
+          const { context } = this.get();
+          let { sample } = this.get();
+          const x1 = context.x(clamp(d3.event.x, 20, context.width - 20));
+          const x2 = context.y(clamp(d3.event.y, 20, context.height - 20));
+          sample = { x1: x1, x2: x2 };
+          this.set({ sample });
+        }));
+      d3.select(this.refs.x1).call(d3.drag()
+        .on('drag', () => {
+          const { context } = this.get();
+          let { sample } = this.get();
+          const x1 = context.y(clamp(d3.event.y, 20, context.width - 20));
+          sample = { x1: x1, x2: sample.x2 };
+          this.set({ sample });
+        }));
+      d3.select(this.refs.x2).call(d3.drag()
+        .on('drag', () => {
+          const { context } = this.get();
+          let { sample } = this.get();
+          const x2 = context.y(clamp(d3.event.y, 20, context.width - 20));
+          sample = { x1: sample.x1, x2: x2 };
+          this.set({ sample });
+        }));
+    }
+  };
+</script>
