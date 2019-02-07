@@ -452,13 +452,13 @@
 
     <p>
       Analogous to the prior distribution, we could obtain a prediction by sampling from this distribution.
-      But, since sampling involves randomness, we would have no guarantee that the result is a good fit to the data.
-      In order to make a better prediction we can use the other basic operation of Gaussian distributions.
+      But, since sampling involves randomness, the resulting fit to the data would not be deterministic and our prediction could end up being an outlier.
+      In order to make a more meaningful prediction we can use the other basic operation of Gaussian distributions.
     </p>
 
     <p>
       Through <i>marginalization</i> of each random variable, we can extract the respective mean function value <d-math>\mu'_i</d-math> and standard deviation <d-math>\sigma'_i = \Sigma'_{ii}</d-math> for <d-math>i</d-math>-th test point.
-      In contrast to the prior distribution, we set the mean to <d-math>\mu=0</d-math>, so in this context it is not really of importance.
+      In contrast to the prior distribution, we set the mean to <d-math>\mu=0</d-math>.
       But when we condition the joint distribution of the test and training data the resulting distribution will most likely have a non-zero mean <d-math>\mu' \neq 0</d-math>.
       Extracting <d-math>\mu'</d-math> and <d-math>\sigma'</d-math> does not only lead to a more meaningful prediction, it also makes a statement about the confidence of he prediction.
     </p>
