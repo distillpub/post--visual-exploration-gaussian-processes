@@ -299,7 +299,7 @@
       We then interpret the <d-math>i</d-math>-th component of the resulting vector as the function value corresponding to the <d-math>i</d-math>-th test point.
     </p>
 
-    <h3>Kernels</h3>
+    <h3 id="Kernels">Kernels</h3>
     <p>
       Recall that in order to set up our distribution, we need to define <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.
       In Gaussian processes it is often assumed that <d-math>\mu = 0</d-math>, which simplifies the necessary equations for conditioning.
@@ -505,16 +505,19 @@
 
     <p>
       As described earlier, the power of Gaussian processes lies in the choice of the kernel function.
-      This property allows an expert to introduce domain knowledge into the process and lends Gaussian processes their flexibility to capture trends in the training data.
-      For example, by choosing a suitable bandwidth for the RBF kernel, an expert can control how smooth the resulting function will be.
+      This property allows experts to introduce domain knowledge into the process and lends Gaussian processes their flexibility to capture trends in the training data.
+      For example, by choosing a suitable bandwidth for the RBF kernel, we can control how smooth the resulting function will be.
     </p>
     <p>
       A big benefit that kernels provide is that they can be combined together, resulting in a more specialized kernel.
-      This gives domain experts the ability to include further information, leading to a more accurate prediction.
-      The decision which kernel to use is highly dependent on prior knowledge about the data, e.g if certain characteristics are expected. Examples for this would be stationary nature, as well as global trends or patterns.
+      The decision which kernel to use is highly dependent on prior knowledge about the data, e.g if certain characteristics are expected.
+      Examples for this would be stationary nature, or global trends and patterns.
+      As introduced in the <a href="#Kernels">section on kernels</a>, stationary means that a kernel is translation invariant and therefore independent of a change in time.
+      This makes global trends not possible in a strictly stationary kernel.
       The more prior assumption we can make, the better the resulting model.
-      When choosing the best kernel combinations, all methods that preserve the finitely positive semi-definiteness property of a kernel are allowed.
-      The most common kernel combinations would be addition and multiplication, however there are more uncommon possibilities such as concatenation or composition with a function <d-cite key="mackay2003information"></d-cite>.
+      Remember that the covariance matrix of GPs has to have the property of finitely positive semi-definiteness.
+      When choosing the optimal kernel combinations, all methods that preserve this property are allowed.
+      The most common kernel combinations would be addition and multiplication.
     </p>
     <p>
       Let's consider two kernels, a linear kernel <d-math>k_{\text{lin}}</d-math> and a periodic kernel <d-math>k_{\text{per}}</d-math>, for example.
@@ -526,8 +529,9 @@
     </d-math>
 
   <p>
-    Combining kernels might retain qualitative features of the individual kernels.
-    For example, when adding a periodic and a linear kernel, the global trend of the linear kernel is incorporated into the combined kernel.
+    However, combinations are not limited to the above example, and there are more possibilities such as concatenation or composition with a function <d-cite key="mackay2003information"></d-cite>.
+    To show the impact of a kernel combination and how it might retain qualitative features of the individual kernels, take a look at the <a href="#KernelCombinations">figure below</a>.
+    If we add a periodic and a linear kernel, the global trend of the linear kernel is incorporated into the combined kernel.
     The result is a periodic function that follows a linear trend.
     When combining the same kernels through multiplication instead, the result is a periodic function with a linearly growing amplitude away from linear kernel parameter <d-math>c</d-math>.
   </p>
@@ -543,8 +547,9 @@
   </figure>
     
     <p>
-      In the <a href="#KernelCombinations">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
-      Using only a linear kernel, it is possible to achieve a normal linear regression of the points.
+      Knowing more about how kernel combinations influence the shape of the resulting distribution, we can move on to a more complex example.
+      In the <a href="#KernelCombinationsStatic">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
+      Using only a linear kernel, we can mimic a normal linear regression of the points.
       At first glance the RBF kernel accurately approximates the points.
       But since the RBF kernel is stationary it will always return to <d-math>\mu=0</d-math> in regions further away from observed training data.
       This decreases the accuracy for predictions that reach further into the past or the future.
@@ -562,7 +567,7 @@
     </figure>
 
     <p>
-      As previously discussed, the Gaussian process regression has been done in combination with a noise model, meaning a noise variance is added to the kernel function.
+      As discussed in the <a href="#GaussianProcesses">section about GPs</a>, a Gaussian process can model uncertain observations.
       This can be seen when only selecting the linear kernel, as it allows us to perform linear regression even if more than two points have been observed, and not all functions have to pass directly through the observed training data.
     </p>
 
