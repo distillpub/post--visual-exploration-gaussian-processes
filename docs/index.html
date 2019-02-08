@@ -106,7 +106,7 @@
   </p>
 
   <p>
-    We will first explore the mathematical foundation they are built on, and you can follow along using interactive figures and hands-on examples.
+    We will first explore the mathematical foundation that Gaussian procsses are built on $\mdash; we invite you to follow along using the interactive figures and hands-on examples.
     They help to explain the impact of individual components, and show the flexibility of Gaussian processes.
     After following this article we hope that you will have a visual intuition on how Gaussian processes work and how you can configure them for different types of data.
   </p>
@@ -117,6 +117,7 @@
     As the name suggests, the Gaussian distribution (which is often also referred to as <i>normal</i> distribution) is the basic building block of Gaussian processes.
     In particular, we are interested in the multivariate case of this distribution, where each random variable is distributed normally and their joint distribution is also Gaussian.
     The multivariate Gaussian distribution is defined by a mean vector <d-math>\mu</d-math> and a covariance matrix <d-math>\Sigma</d-math>.
+    You can see an interative example of such distributions in <a href="#Multivariate">the figure below</a>.
   </p>
 
   <p>
@@ -238,7 +239,7 @@
     <p>
       First, we will move from the continuous view to the discrete representation of a function:
       rather than finding an implicit function, we are interested in predicting the function values at concrete points, which we call <i>test points</i> <d-math>X</d-math>.
-      So how do we derive this functional view from the multivariate normal distributions which we have considered so far?
+      So how do we derive this functional view from the multivariate normal distributions that we have considered so far?
       Stochastic processes, such as Gaussian processes, are essentially a set of random variables.
       In addition, each of these random variables has a corresponding index <d-math>i</d-math>.
       We will use this index to refer to the <d-math>i</d-math>-th dimension of our <d-math>n</d-math>-dimensional multivariate distributions. 
@@ -298,11 +299,12 @@
       We then interpret the <d-math>i</d-math>-th component of the resulting vector as the function value corresponding to the <d-math>i</d-math>-th test point.
     </p>
 
-    <h3>Kernels</h3>
+    <h3 id="Kernels">Kernels</h3>
     <p>
       Recall that in order to set up our distribution, we need to define <d-math>\mu</d-math> and <d-math>\Sigma</d-math>.
       In Gaussian processes it is often assumed that <d-math>\mu = 0</d-math>, which simplifies the necessary equations for conditioning.
       We can always assume such a distribution, even if <d-math>\mu \neq 0</d-math>, and add <d-math>\mu</d-math> back to the resulting function values after the prediction step.
+      This process is also called <i>centering</i> of the data.
       So configuring <d-math>\mu</d-math> is straight forward &mdash; it gets more interesting when we look at the other parameter of the distribution.
     </p>
 
@@ -365,6 +367,8 @@
     <p>
       We will now shift our focus back to the original task of regression.
       As we have mentioned earlier, Gaussian processes define a probability distribution over possible functions.
+      In <a href="#DimensionSwap">this figure above</a>, we show this connection:
+      each sample of our multivariate normal distribution represents one realization of our function values.
       Because this distribution is a multivariate Gaussian distribution, the distribution of functions is normal.
       Recall that we usually assume <d-math>\mu=0</d-math>.
       For now, let's consider the case where we have not yet observed any training data.
@@ -379,8 +383,8 @@
 
     <p>
       In the previous section we have looked at examples of different kernels.
-      Since the kernel is used to define the entries of the covariance matrix, it also determines which type of
-      functions from the space of all possible functions are more probable.
+      The kernel is used to define the entries of the covariance matrix.
+      Consequently, the covariance matrix determines which type of functions from the space of all possible functions are more probable.
       As the prior distribution does not yet contain any additional information, it is perfect to visualize the influence of the kernel on the distribution of functions.
       The <a href="#Prior">following figure</a> shows samples of potential functions from prior distributions that were created using different kernels:
     </p>
@@ -433,7 +437,7 @@
        As mentioned before, the conditional distribution <d-math>P_{X|Y}</d-math> forces the set of functions to precisely pass through each training point.
        In many cases this can lead to fitted functions that are unnecessary complex.
        Also, up until now, we have considered the training points <d-math>Y</d-math> to be perfect measurements.
-       But in real-world scenarios this is an unrealistic assumption, since most of our data is afflicted with measurement errors.
+       But in real-world scenarios this is an unrealistic assumption, since most of our data is afflicted with measurement errors or uncertainty.
        Gaussian processes offer a simple solution to this problem by modeling the error of the measurements.
        For this, we need to add an error term <d-math>\epsilon \sim \mathcal{N}(0, \psi^2)</d-math> to each of our training points:
     </p>
@@ -451,7 +455,7 @@
     </p>
 
     <p>
-      Analogous to the prior distribution, we could obtain a prediction by sampling from this distribution.
+      Analogous to the prior distribution, we could obtain a prediction for our function values by sampling from this distribution.
       But, since sampling involves randomness, the resulting fit to the data would not be deterministic and our prediction could end up being an outlier.
       In order to make a more meaningful prediction we can use the other basic operation of Gaussian distributions.
     </p>
@@ -460,7 +464,7 @@
       Through <i>marginalization</i> of each random variable, we can extract the respective mean function value <d-math>\mu'_i</d-math> and standard deviation <d-math>\sigma'_i = \Sigma'_{ii}</d-math> for <d-math>i</d-math>-th test point.
       In contrast to the prior distribution, we set the mean to <d-math>\mu=0</d-math>.
       But when we condition the joint distribution of the test and training data the resulting distribution will most likely have a non-zero mean <d-math>\mu' \neq 0</d-math>.
-      Extracting <d-math>\mu'</d-math> and <d-math>\sigma'</d-math> does not only lead to a more meaningful prediction, it also makes a statement about the confidence of he prediction.
+      Extracting <d-math>\mu'</d-math> and <d-math>\sigma'</d-math> does not only lead to a more meaningful prediction, it also allows us to make a statement about the confidence of the prediction.
     </p>
 
     <p>
@@ -501,16 +505,19 @@
 
     <p>
       As described earlier, the power of Gaussian processes lies in the choice of the kernel function.
-      This property allows an expert to introduce domain knowledge into the process and lends Gaussian processes their flexibility to capture trends in the training data.
-      For example, by choosing a suitable bandwidth for the RBF kernel, an expert can control how smooth the resulting function will be.
+      This property allows experts to introduce domain knowledge into the process and lends Gaussian processes their flexibility to capture trends in the training data.
+      For example, by choosing a suitable bandwidth for the RBF kernel, we can control how smooth the resulting function will be.
     </p>
     <p>
       A big benefit that kernels provide is that they can be combined together, resulting in a more specialized kernel.
-      This gives domain experts the ability to include further information, leading to a more accurate prediction.
-      The decision which kernel to use is highly dependent on prior knowledge about the data, e.g if certain characteristics are expected. Examples for this would be stationary nature, as well as global trends or patterns.
+      The decision which kernel to use is highly dependent on prior knowledge about the data, e.g if certain characteristics are expected.
+      Examples for this would be stationary nature, or global trends and patterns.
+      As introduced in the <a href="#Kernels">section on kernels</a>, stationary means that a kernel is translation invariant and therefore independent of a change in time.
+      This makes global trends not possible in a strictly stationary kernel.
       The more prior assumption we can make, the better the resulting model.
-      When choosing the best kernel combinations, all methods that preserve the finitely positive semi-definiteness property of a kernel are allowed.
-      The most common kernel combinations would be addition and multiplication, however there are more uncommon possibilities such as concatenation or composition with a function <d-cite key="mackay2003information"></d-cite>.
+      Remember that the covariance matrix of GPs has to have the property of finitely positive semi-definiteness.
+      When choosing the optimal kernel combinations, all methods that preserve this property are allowed.
+      The most common kernel combinations would be addition and multiplication.
     </p>
     <p>
       Let's consider two kernels, a linear kernel <d-math>k_{\text{lin}}</d-math> and a periodic kernel <d-math>k_{\text{per}}</d-math>, for example.
@@ -522,8 +529,9 @@
     </d-math>
 
   <p>
-    Combining kernels might retain qualitative features of the individual kernels.
-    For example, when adding a periodic and a linear kernel, the global trend of the linear kernel is incorporated into the combined kernel.
+    However, combinations are not limited to the above example, and there are more possibilities such as concatenation or composition with a function <d-cite key="mackay2003information"></d-cite>.
+    To show the impact of a kernel combination and how it might retain qualitative features of the individual kernels, take a look at the <a href="#KernelCombinations">figure below</a>.
+    If we add a periodic and a linear kernel, the global trend of the linear kernel is incorporated into the combined kernel.
     The result is a periodic function that follows a linear trend.
     When combining the same kernels through multiplication instead, the result is a periodic function with a linearly growing amplitude away from linear kernel parameter <d-math>c</d-math>.
   </p>
@@ -539,8 +547,9 @@
   </figure>
     
     <p>
-      In the <a href="#KernelCombinations">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
-      Using only a linear kernel, it is possible to achieve a normal linear regression of the points.
+      Knowing more about how kernel combinations influence the shape of the resulting distribution, we can move on to a more complex example.
+      In the <a href="#KernelCombinationsStatic">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
+      Using only a linear kernel, we can mimic a normal linear regression of the points.
       At first glance the RBF kernel accurately approximates the points.
       But since the RBF kernel is stationary it will always return to <d-math>\mu=0</d-math> in regions further away from observed training data.
       This decreases the accuracy for predictions that reach further into the past or the future.
@@ -558,7 +567,7 @@
     </figure>
 
     <p>
-      As previously discussed, the Gaussian process regression has been done in combination with a noise model, meaning a noise variance is added to the kernel function.
+      As discussed in the <a href="#GaussianProcesses">section about GPs</a>, a Gaussian process can model uncertain observations.
       This can be seen when only selecting the linear kernel, as it allows us to perform linear regression even if more than two points have been observed, and not all functions have to pass directly through the observed training data.
     </p>
 
@@ -571,7 +580,8 @@
     </p>
 
     <p>
-      As this might not be possible in many cases, learning specialized kernel functions from the underlying data using deep learning <d-cite key="Hinton2008,Wilson2016"></d-cite> is an area of ongoing research.
+      For instance, sometimes it might not be possible to describe the kernel in simple terms.
+      To overcome this challenge, learning specialized kernel functions from the underlying data, for example by using deep learning <d-cite key="Hinton2008,Wilson2016"></d-cite>, is an area of ongoing research.
       Furthermore, links between Bayesian inference, Gaussian processes and deep learning have been described in several papers<d-cite key="Lee2018,Damianou2013"></d-cite>.
       Even though we mostly talk about Gaussian processes in the context of regression, they can be adapted for
       different purposes, e.g. <i>model-peeling</i> and hypothesis testing.
