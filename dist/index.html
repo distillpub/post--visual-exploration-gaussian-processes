@@ -510,12 +510,12 @@
     </p>
     <p>
       A big benefit that kernels provide is that they can be combined together, resulting in a more specialized kernel.
-      The decision which kernel to use is highly dependent on prior knowledge about the data, e.g if certain characteristics are expected.
+      The decision which kernel to use is highly dependent on prior knowledge about the data, e.g. if certain characteristics are expected.
       Examples for this would be stationary nature, or global trends and patterns.
-      As introduced in the <a href="#Kernels">section on kernels</a>, stationary means that a kernel is translation invariant and therefore independent of a change in time.
-      This makes global trends not possible in a strictly stationary kernel.
-      The more prior assumption we can make, the better the resulting model.
-      Remember that the covariance matrix of GPs has to have the property of finitely positive semi-definiteness.
+      As introduced in the <a href="#Kernels">section on kernels</a>, stationary means that a kernel is translation invariant and therefore not dependent on the index <d-math>i</d-math>.
+      This also means that we cannot model global trends using a strictly stationary kernel.
+      The more prior assumptions we can make, the more accurate the resulting model will be.
+      Remember that the covariance matrix of Gaussian processes has to be positive semi-definite.
       When choosing the optimal kernel combinations, all methods that preserve this property are allowed.
       The most common kernel combinations would be addition and multiplication.
     </p>
