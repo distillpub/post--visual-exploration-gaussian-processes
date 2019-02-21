@@ -6,7 +6,8 @@
       <text x="5" y={context.v(sample.x2) - 5} class="annotation point">x<tspan class="ss">2</tspan></text>
       <line x1="0" y1={context.v(sample.x2)} x2={context.u(sample.x1)} y2={context.v(sample.x2)} stroke="rgb(245, 181, 62)" stroke-width="2" />
       <line x1={context.u(sample.x1)} y1={context.height} x2={context.u(sample.x1)} y2={context.v(sample.x2)} stroke="rgb(245, 181, 62)" stroke-width="2" />
-      <circle ref:xy class="handle" cx={context.u(sample.x1)} cy={context.v(sample.x2)} r="4" />
+      <circle ref:xy class="handleInvisible" cx={context.u(sample.x1)} cy={context.v(sample.x2)} r="44" />
+      <circle class="handle" cx={context.u(sample.x1)} cy={context.v(sample.x2)} r="4" />
     </svg>
   </div>
   <div class="grid-item">
@@ -17,8 +18,10 @@
       <line ref:zero x1="0" y1="{context.v(0)}" x2="{context.width}" y2="{context.v(0)}" /> 
       <line x1={context.width/3} y1={context.height} x2={context.width/3} y2={context.v(sample.x1)} stroke="rgb(245, 181, 62)" stroke-width="2" />
       <line x1={(context.width/3)*2} y1={context.height} x2={(context.width/3)*2} y2={context.v(sample.x2)} stroke="rgb(245, 181, 62)" stroke-width="2" />
-      <circle ref:x1 class="handle" cx={context.width/3} cy={context.v(sample.x1)} r="4" />
-      <circle ref:x2 class="handle" cx={(context.width/3)*2} cy={context.v(sample.x2)} r="4" />
+      <circle ref:x1 class="handleInvisible" cx={context.width/3} cy={context.v(sample.x1)} r="44" />
+      <circle ref:x2 class="handleInvisible" cx={(context.width/3)*2} cy={context.v(sample.x2)} r="44" />
+      <circle class="handle" cx={context.width/3} cy={context.v(sample.x1)} r="4" />
+      <circle class="handle" cx={(context.width/3)*2} cy={context.v(sample.x2)} r="4" />
     </svg>
   </div>
 </div>
@@ -46,6 +49,11 @@
 
   .grid-item {
     margin: 0.3em;
+  }
+
+  .handleInvisible {
+    fill: rgba(245, 181, 62, 0);
+    cursor: grab;
   }
 
   .handle {

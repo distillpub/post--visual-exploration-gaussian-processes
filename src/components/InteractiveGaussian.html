@@ -1,12 +1,19 @@
 <svg width="{context.width}" height="{context.height}">
   <GaussianContours width="{context.width}" height="{context.height}" {context} {gaussian} />
-  <circle class="handle" ref:e1 cx={context.u(eig.e1.x)} cy={context.v(eig.e1.y)} r="4" />
-  <circle class="handle" ref:e2 cx={context.u(eig.e2.x)} cy={context.v(eig.e2.y)} r="4" />
+  <circle class="handleInvisible" ref:e1 cx={context.u(eig.e1.x)} cy={context.v(eig.e1.y)} r="44" />
+  <circle class="handleInvisible" ref:e2 cx={context.u(eig.e2.x)} cy={context.v(eig.e2.y)} r="44" />
+  <circle class="handle"  cx={context.u(eig.e1.x)} cy={context.v(eig.e1.y)} r="4" />
+  <circle class="handle"  cx={context.u(eig.e2.x)} cy={context.v(eig.e2.y)} r="4" />
   <line x1={context.u(gaussian.mean[0])} y1={context.v(gaussian.mean[1])} x2={context.u(eig.e1.x)} y2={context.v(eig.e1.y)} stroke="rgb(245, 181, 62)" stroke-width="2" />
   <line x1={context.u(gaussian.mean[0])} y1={context.v(gaussian.mean[1])} x2={context.u(eig.e2.x)} y2={context.v(eig.e2.y)} stroke="rgb(245, 181, 62)" stroke-width="2" />
 </svg>
 
 <style>
+  .handleInvisible {
+    fill: rgba(245, 181, 62, 0);
+    cursor: grab;
+  }
+
   .handle {
     fill: rgb(245, 181, 62);
   }
