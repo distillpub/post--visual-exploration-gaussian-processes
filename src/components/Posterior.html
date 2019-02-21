@@ -40,6 +40,19 @@
   </div>
 </div>
 
+<figcaption>
+  <a on:click="selectSzenario([{x: -1.122, y: -1, active: false},
+          {x: 1.122, y: 1, active: false}])"> Without any activated training data </a>,
+  this figure shows the prior distribution of a Gaussian process with a RBF kernel.
+  When <a on:click="fakeHover()">hovering over the covariance matrix</a>, the opacity of the gradient shows the influence of a function
+  value on its neighbours.
+  The distribution changes when we <a on:click="selectSzenario([{x: -1.122, y: -1, active: true},
+  {x: 1.122, y: 1, active: true}])">observe training data</a>.
+  Individual points can be activated by clicking on them.
+  The Gaussian process is then constrained to make <span style="color:#918f8f">functions</span>, that intersect these data points, more probable.
+  The best explanation of the training data is given by the updated mean <span style="color:#C60D88">function</span>.
+</figcaption>
+
 <style>
   ref:annotations {
     position: absolute;
@@ -176,6 +189,23 @@
     },
 
     methods: {
+      fakeHover(){
+        const {n} = this.refs.covMat.get();
+        const parent = d3.select(this.refs.covMat.refs.covMat);
+        const obj = {column:Math.ceil(n/2), row:Math.ceil(n/2)};
+        this.refs.covMat.mouseOverHover(obj, parent);
+        this.refs.covMat.set({shouldResample: true});
+      },
+      selectSzenario(values){
+        const {hoveredRow} = this.refs.covMat.get();
+        let {trainingPoints} = this.get();
+        trainingPoints = values;
+        this.refs.covMat.set({shouldResample: true});
+        this.set({trainingPoints});
+        if(hoveredRow != -1) {
+          this.fakeHover();
+        }
+      },
       colorBar() {
         const svg = d3.select(this.refs.covScale);
         const currentComponent = this.refs.covMat;

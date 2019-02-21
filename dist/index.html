@@ -430,6 +430,7 @@
       The intuition behind this step is that the training points constrain the set of functions to those that pass through the training points.
     </p>
 
+    <figure>
     <d-figure id="PosteriorFigure"></d-figure>
     </figure>
 
@@ -481,17 +482,8 @@
       As we would expect, the uncertainty of the prediction is small in regions close to the training data and grows as we move further away from those points.
     </p>
 
-  <figure class="l-middle-outset">
+    <figure>
         <d-figure id="Posterior"></d-figure>
-    <figcaption>
-      Without any activated training data, this figure shows the prior distribution of a Gaussian process with a RBF
-      kernel. When hovering over the covariance matrix, the opacity of the gradient shows the influence of a function
-      value on its neighbours.
-      The distribution changes when we observe training data. Individual points can be activated by clicking on them.
-      The Gaussian process is then constrained to make <span style="color:#918f8f">functions</span>, that intersect
-      these data points, more probable. The best explanation of the training data is given by the updated mean <span
-      style="color:#C60D88">function</span>.
-    </figcaption>
     </figure>
   <p>
     In the constrained covariance matrix, we can see that the correlation of neighbouring points is affected by the

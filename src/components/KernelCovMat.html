@@ -88,6 +88,26 @@
       }
     },
     methods: {
+      mouseOverHover(d,parent){
+        parent.selectAll('.covSelectedRect').style('opacity', 1);
+        parent.selectAll('.covSelectedRectRow').style('opacity', 1);
+        this.hoverGrid(d, parent);
+        const hoveredRow = d;
+        let hoveredRowIdx;
+        const colorsRow = parent.selectAll('.covRect').filter(function (h) {
+          if (h.row === d.row) {
+            hoveredRowIdx = h.row;
+          }
+          return h.row === d.row;
+        });
+        const result2 = colorsRow.data();
+        this.set({
+          colorsRow: result2,
+          hoveredRow: hoveredRow,
+          hoveredRowIdx: hoveredRowIdx,
+          shouldResample: false
+        });
+      },
       updateSlider(value, name, ref) {
         this.set({shouldResample: true});
         this.root.resample();
@@ -230,7 +250,7 @@
       const covMat = gp.covMatrix(xs, fn);
 
       const {gridSize, offset, width, height, interaction, showText, grid} = currentObject.get();
-      let {hoveredRow, hoveredRowIdx, gridNode} = currentObject.get();
+      let {gridNode} = currentObject.get();
       const svg = d3.select(this.refs.covMat)
         .attr('width', width + offset)
         .attr('height', height + offset);
@@ -328,23 +348,7 @@
 
         svg.selectAll('.covRect').on('mouseover', function (d) {
           const parent = d3.select(d3.select(this).node().parentNode.parentNode);
-          parent.selectAll('.covSelectedRect').style('opacity', 1);
-          parent.selectAll('.covSelectedRectRow').style('opacity', 1);
-          currentObject.hoverGrid(d, parent);
-          hoveredRow = d;
-          const colorsRow = svg.selectAll('.covRect').filter(function (h) {
-            if (h.row === d.row) {
-              hoveredRowIdx = h.row;
-            }
-            return h.row === d.row;
-          });
-          const result2 = colorsRow.data();
-          currentObject.set({
-            colorsRow: result2,
-            hoveredRow: hoveredRow,
-            hoveredRowIdx: hoveredRowIdx,
-            shouldResample: false
-          });
+          currentObject.mouseOverHover(d,parent);
         });
         svg.on('mouseleave', function () {
           const parent = d3.select(d3.select(this).node().parentNode.parentNode);
