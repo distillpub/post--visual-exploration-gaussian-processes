@@ -92,7 +92,7 @@
         parent.selectAll('.covSelectedRect').style('opacity', 1);
         parent.selectAll('.covSelectedRectRow').style('opacity', 1);
         this.hoverGrid(d, parent);
-        let hoveredRow = d;
+        const hoveredRow = d;
         let hoveredRowIdx;
         const colorsRow = parent.selectAll('.covRect').filter(function (h) {
           if (h.row === d.row) {
@@ -250,7 +250,7 @@
       const covMat = gp.covMatrix(xs, fn);
 
       const {gridSize, offset, width, height, interaction, showText, grid} = currentObject.get();
-      let {hoveredRow, hoveredRowIdx, gridNode} = currentObject.get();
+      let {gridNode} = currentObject.get();
       const svg = d3.select(this.refs.covMat)
         .attr('width', width + offset)
         .attr('height', height + offset);

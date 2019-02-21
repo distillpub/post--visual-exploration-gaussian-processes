@@ -192,7 +192,7 @@
       fakeHover(){
         const {n} = this.refs.covMat.get();
         const parent = d3.select(this.refs.covMat.refs.covMat);
-        let obj = {column:Math.ceil(n/2), row:Math.ceil(n/2)};
+        const obj = {column:Math.ceil(n/2), row:Math.ceil(n/2)};
         this.refs.covMat.mouseOverHover(obj, parent);
         this.refs.covMat.set({shouldResample: true});
       },
