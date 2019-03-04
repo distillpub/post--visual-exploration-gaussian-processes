@@ -50,10 +50,10 @@ module.exports = {
   },
   output: {
     filename: 'js/bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'public')
   },
   serve: {
-    content: path.join(__dirname, 'dist'),
+    content: path.join(__dirname, 'public'),
     open: true
   },
   mode: devMode ? 'development' : 'production',
