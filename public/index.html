@@ -1,56 +1,20 @@
 <!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8"/>
-<title>A Visual Exploration of Gaussian Processes</title>
-<script>
-  window.addEventListener('WebComponentsReady', function () {
-    const loaderTag = document.createElement('script');
-    loaderTag.src = 'js/template.v2.js';
-    document.head.insertBefore(loaderTag, document.head.firstChild);
-    const loaderTag2 = document.createElement('script');
-    loaderTag2.src = 'js/bundle.js';
-    document.head.insertBefore(loaderTag2, document.head.firstChild);
-  });
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.17/webcomponents-loader.js"></script>
-<link rel="stylesheet" type="text/css" href="css/style.css">
+  <meta charset="utf-8"/>
+  <title>A Visual Exploration of Gaussian Processes</title>
+  <script>
+    window.addEventListener('WebComponentsReady', function () {
+      const loaderTag = document.createElement('script');
+      loaderTag.src = 'js/bundle.js';
+      document.head.insertBefore(loaderTag2, document.head.firstChild);
+    });
+  </script>
+  <script src="https://distill.pub/template.v2.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
 
-<!-- Google Scholar meta tags -->
-<meta name="citation_title" content="A Visual Exploration of Gaussian Processes">
-<meta name="citation_author" content="Görtler, Jochen">
-<meta name="citation_author" content="Kehlbeck, Rebecca">
-<meta name="citation_author" content="Deussen, Oliver">
-<meta name="citation_publication_date" content="2018/10/22">
-<meta name="citation_online_date" content="2018/09/03">
-<meta name="citation_conference_title" content="Proceedings of the Workshop on Visualization for AI Explainability (VISxAI)">
-<meta name="citation_firstpage" content="1">
-<meta name="citation_keywords" content="visualization, machine learning, explainability, gaussian processes, artificial intelligence, explainable artificial intelligence">
-
-<!-- OG meta tags -->
-<meta property='og:title' content="A Visual Exploration of Gaussian Processes">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.jgoertler.com/visual-exploration-gaussian-processes/">
-<meta property="og:image" content="">
-<meta property="og:description" content="How to turn a collection of small building blocks into a versatile tool for solving regression problems.">
-<meta property="og:site_name" content="Jochen Görtler">
-<meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2018-12-03">
-<meta property="article:author" content="Görtler, Jochen">
-<meta property="article:author" content="Kehlbeck, Rebecca">
-<meta property="article:author" content="Deussen, Oliver">
-
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-122647105-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-122647105-1');
-</script>
 </head>
-
-<distill-header></distill-header>
+<body>
 
 <d-front-matter>
   <script type="text/json">{
@@ -84,6 +48,9 @@
   <p>How to turn a collection of small building blocks into a versatile tool for solving regression problems.</p>
   <d-figure id="Teaser" class="l-screen shaded-figure"></d-figure>
 </d-title>
+
+<d-byline></d-byline>
+
 <d-article>
     <h3>This article was presented at <a href="http://visxai.io/" target="_blank">VISxAI</a>, it is now under review at <a href="https://distill.pub/" target="_blank">distill.pub</a>.</h3>
     <h2>Introduction</h2>
@@ -614,3 +581,5 @@
     <d-bibliography src="references.bib"></d-bibliography>
 </d-appendix>
 
+</body>
+</html>
