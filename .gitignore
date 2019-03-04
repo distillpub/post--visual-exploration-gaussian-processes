@@ -67,5 +67,3 @@ dist/js/main.min.js
 # JabRef
 *.sav
 *.bak
-
-dist/js/bundle.js
