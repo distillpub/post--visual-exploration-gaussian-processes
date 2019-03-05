@@ -3,10 +3,6 @@
   text-align: center;
 }
 
-d-article {
- text-align: justify;
-}
-
 .shaded-figure {
   background-color: hsl(200, 20%, 97%);
   border-top: 1px solid hsla(0, 0%, 0%, 0.1);
@@ -23,6 +19,11 @@ d-article {
 
 figure {
   text-align: center;
+  overflow-x: scroll;
+}
+
+.katex-display {
+  overflow-x: scroll;
 }
 
 figcaption {
