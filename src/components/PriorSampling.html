@@ -8,7 +8,7 @@
 </div>
 <div ref:gridMultipleKernel class="kernel-grid">
   <div class="grid-item" on:click="toggleOnOff()">
-  <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}">
+  <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}">
     <g>
     {#each shadowPaths as sp}
     <path d="{sp}" class="shadowLine" />
@@ -31,10 +31,21 @@
 </div>
 
 <style>
+  ref:svgArea {
+    width: 100%;
+    height: auto;
+  }
 
   .kernel-grid {
     display: inline-grid;
-    grid-template-columns: auto auto auto auto;
+    grid-template-columns: 1fr;
+  }
+
+  @media only screen and (min-width: 1168px) {
+    .kernel-grid {
+      display: inline-grid;
+      grid-template-columns: 4fr 1.5fr;
+    }
   }
 
   .grid-item {

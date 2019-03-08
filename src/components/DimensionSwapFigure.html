@@ -1,6 +1,6 @@
 <div class="gauss-grid">
   <div class="grid-item">
-    <svg width="{context.width}" height="{context.height}" class="plot">
+    <svg width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}" class="plot">
       <GaussianContours width="{context.width}" height="{context.height}" {context} {gaussian} />
       <text x={context.u(sample.x1) + 5} y={context.height - 5} class="annotation point">x<tspan class="ss">1</tspan></text>
       <text x="5" y={context.v(sample.x2) - 5} class="annotation point">x<tspan class="ss">2</tspan></text>
@@ -11,7 +11,7 @@
     </svg>
   </div>
   <div class="grid-item">
-    <svg width="{context.width}" height="{context.height}" class="plot">
+    <svg width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}" class="plot">
       <text x="5" y="{context.v(0)-5}" class="annotation">μ</text>
       <text x={context.width/3 + 5} y={context.height - 5} class="annotation point">x<tspan class="ss">1</tspan></text>
       <text x={(context.width/3)*2 + 5} y={context.height - 5} class="annotation point">x<tspan class="ss">2</tspan></text>
@@ -27,6 +27,13 @@
 </div>
 
 <style>
+
+  .plot {
+    width: 100%;
+    height: auto;
+  }
+
+
   ref:zero {
     stroke: rgba(0,0,0,0.2);
     stroke-width: 1px;

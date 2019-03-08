@@ -8,14 +8,14 @@
     <h4>Conditioning (X = {twoDecimals(cond)})</h4>
   </div>
   <div class="grid-item">
-      <svg width="{sideWidth}" height="{context.height}" class="plot">
+      <svg width="{sideWidth}" height="{context.height}" viewBox="0 0 {sideWidth} {context.height}" class="plot">
       <path d="{marginalizedPath}" class="curve"></path>
       <text x="{sideWidth-42}" y="{toV(context, marginalizedGauss.mean.get(0,0))}" class="annotation">μ<tspan class="ss">Y</tspan> = {twoDecimals(marginalizedGauss.mean.get(0,0))}</text>
       <text x="5" y="{context.height-10}" class="annotation">σ<tspan class="ss">Y</tspan> = {twoDecimals(marginalizedGauss.cov.get(0,0))}</text>
     </svg>
   </div>
   <div class="grid-item">
-    <svg width="{context.width}" height="{context.height}" class="plot">
+    <svg width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}" class="plot">
         <InteractiveGaussian
           ref:gauss context={context}
           sigma1={gaussian.cov.get(0,0)}
@@ -29,7 +29,7 @@
     </svg>
   </div>
   <div class="grid-item">
-      <svg width="{sideWidth}" height="{context.height}" class="plot">
+      <svg width="{sideWidth}" height="{context.height}" viewBox="0 0 {sideWidth} {context.height}" class="plot">
       <path d="{conditionedPath}" class="line"></path>
       <text x="5" y="{toV(context, conditionedGauss.mean.get(0,0))}" class="annotation">μ<tspan class="ss">Y|X</tspan> = {twoDecimals(conditionedGauss.mean.get(0,0))}</text>
       <text x="5" y="{context.height-10}" class="annotation">σ<tspan class="ss">Y|X</tspan> = {twoDecimals(marginalizedGauss.cov.get(0,0))}</text>
@@ -38,9 +38,15 @@
 </div>
 
 <style>
+
+  .plot {
+    width: 100%;
+    height: auto;
+  }
+
   .gauss-grid {
     display: inline-grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: 0.81fr 1fr 0.81fr;
     text-align: center;
   }
 

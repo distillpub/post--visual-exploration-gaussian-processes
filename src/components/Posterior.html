@@ -2,7 +2,7 @@
   <div ref:grid class="kernel-grid">
     <div class="grid-item">
       <!--<svg width="{context.width}" height="{context.height*2}">-->
-      <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}" on:click="resample(0)">
+      <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}" viewBox="0 0 300 300" on:click="resample(0)">
         <g ref:graph>
         </g>
         <g>
@@ -36,7 +36,7 @@
     </div>
   </div>
   <div ref:annotations>
-    <svg ref:covScale width="{context.width}" height=50 style="overflow: visible"></svg>
+    <svg ref:covScale viewBox="0 0 {context.width} 50" style="overflow: visible"></svg>
   </div>
 </div>
 
@@ -54,22 +54,32 @@
 </figcaption>
 
 <style>
+  ref:covScale {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 90%;
+    height: auto;
+    margin: 1em;
+  }
+
   ref:annotations {
     position: absolute;
     pointer-events: none;
-    margin: 1em;
     top: 0px;
     left: 0px;
+    display: inline-grid;
+    box-sizing: border-box;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  ref:svgArea{
+    width: 100%;
+    height: auto;
   }
 
   .kernel-grid {
     display: inline-grid;
-    grid-template-columns: auto auto auto;
-  }
-
-  .kernel-grid {
-    display: inline-grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: 1fr 1fr;
   }
 
   .grid-item {
@@ -143,7 +153,7 @@
           {x: -1.122, y: -1, active: false},
           {x: 1.122, y: 1, active: false}
         ],
-        context: new Context(500, 300, [-5, 5], [-10, 10]),
+        context: new Context(300, 300, [-5, 5], [-10, 10]),
         curves: [],
         meanCurve: [],
         circleSize: 0,

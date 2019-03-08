@@ -1,6 +1,6 @@
 <div class="gauss-grid">
     <div class="grid-item">
-        <svg width="{context.width}" height="{context.height}" class="plot">
+        <svg width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}" class="plot">
             <InteractiveGaussian sigma1="{gaussian.cov.get(0,0)}" sigma2="{gaussian.cov.get(1,1)}"
                                  cov="{gaussian.cov.get(0,1)}" context="{context}"
                                  ref:gauss/>
@@ -30,10 +30,26 @@
 </div>
 
 <style>
+
+    svg {
+      width: 100%;
+      height: auto;
+    }
+
     .gauss-grid {
         display: inline-grid;
-        grid-template-columns: auto auto auto;
+        grid-template-columns: 1fr 2fr;
+        grid-auto-rows: min-content;
         text-align: center;
+    }
+
+    @media only screen and (max-width: 1168px) {
+      .gauss-grid {
+        display: inline-grid;
+        grid-template-columns: 1fr;
+        grid-auto-rows: min-content;
+        text-align: center;
+      }
     }
 
     .grid-item {
