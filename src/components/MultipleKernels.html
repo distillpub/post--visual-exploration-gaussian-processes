@@ -4,7 +4,7 @@
     <div><h4>{k.name}</h4></div>
     <div class="equation"><d-math>{k.equation}</d-math></div>
     <div>
-      <KernelCovMat kernel={k.kernel} params={k.params} name={k.name}/>
+      <KernelCovMat kernel={k.kernel} params={k.params} name={k.name} />
     </div>
   </div>
 {/each}
@@ -28,14 +28,26 @@
 
 <style>
 
-  ref:annotations {
-    position: absolute;
-    pointer-events: none;
-    margin: 1em;
-    right: -200px;
-    bottom: 5px;
-    overflow: visible;
-  }
+    ref:annotations {
+         pointer-events: none;
+         overflow: visible;
+         display: block;
+         width: 100%;
+         margin-left: -10%;
+    }
+
+    @media only screen and (min-width: 1168px) {
+      ref:annotations {
+        position: absolute;
+        pointer-events: none;
+        margin: 1em;
+        right: -200px;
+        bottom: 5px;
+        margin-left: 0;
+        overflow: visible;
+        width: 300px;
+      }
+    }
 
     ref:padder {
       padding-top: 108px
@@ -43,7 +55,7 @@
 
     .kernel-grid {
         display: inline-grid;
-        grid-template-columns: auto auto auto auto;
+        grid-template-columns: 2fr 2fr 2fr 1fr;
     }
 
     .grid-item {
@@ -51,7 +63,7 @@
     }
 
     .equation {
-        padding-bottom: 1em;
+      padding-bottom: 1em;
       height: 36px;
     }
 

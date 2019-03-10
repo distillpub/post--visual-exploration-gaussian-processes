@@ -1,4 +1,4 @@
-<svg ref:svgArea class="plot" width="{context.width}" height="{context.height}">
+<svg ref:svgArea class="plot" width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}">
   <g ref:graph>
     <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
     <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}">
@@ -11,6 +11,11 @@
 </svg>
 
 <style>
+  ref:svgArea {
+    width: 100%;
+    height: auto;
+  }
+
   ref:zero {
     stroke: rgba(0,0,0,0.2);
     stroke-width: 1px;
