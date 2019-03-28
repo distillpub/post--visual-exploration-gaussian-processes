@@ -28,26 +28,14 @@
 
 <style>
 
-    ref:annotations {
-         pointer-events: none;
-         overflow: visible;
-         display: block;
-         width: 100%;
-         margin-left: -10%;
-    }
-
-    @media only screen and (min-width: 1168px) {
-      ref:annotations {
-        position: absolute;
-        pointer-events: none;
-        margin: 1em;
-        right: -200px;
-        bottom: 5px;
-        margin-left: 0;
-        overflow: visible;
-        width: 300px;
-      }
-    }
+  ref:annotations {
+    position: absolute;
+    pointer-events: none;
+    margin: 1em;
+    right: -200px;
+    bottom: 5px;
+    overflow: visible;
+  }
 
     ref:padder {
       padding-top: 108px
@@ -55,7 +43,7 @@
 
     .kernel-grid {
         display: inline-grid;
-        grid-template-columns: 2fr 2fr 2fr 1fr;
+        grid-template-columns: auto auto auto auto;
     }
 
     .grid-item {
