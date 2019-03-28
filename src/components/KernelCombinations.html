@@ -4,7 +4,7 @@
 </div>
 <div class="kernel-grid">
   <div class="grid-item">
-    <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}">
+    <svg ref:svgArea class="plot" width="{context.width}" height="{context.height}" viewBox="0 0 {context.width} {context.height}">
       <g ref:graph>
       </g>
       <g>
@@ -61,6 +61,11 @@
 
 <style>
 
+  ref:svgArea {
+    width: 100%;
+    height: auto;
+  }
+
   #info g:hover .annotation {
     display: block;
   }
@@ -85,7 +90,7 @@
 
   .kernel-grid {
     display: inline-grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: 3fr 1fr;
   }
 
   .grid-item {

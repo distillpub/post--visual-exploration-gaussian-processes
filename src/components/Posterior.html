@@ -54,22 +54,32 @@
 </figcaption>
 
 <style>
+  ref:covScale {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 90%;
+    height: auto;
+    margin: 1em;
+  }
+
   ref:annotations {
     position: absolute;
     pointer-events: none;
-    margin: 1em;
     top: 0px;
     left: 0px;
+    display: inline-grid;
+    box-sizing: border-box;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  ref:svgArea{
+    width: 100%;
+    height: auto;
   }
 
   .kernel-grid {
     display: inline-grid;
-    grid-template-columns: auto auto auto;
-  }
-
-  .kernel-grid {
-    display: inline-grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: 1fr 1fr;
   }
 
   .grid-item {

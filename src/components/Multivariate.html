@@ -30,10 +30,26 @@
 </div>
 
 <style>
+
+    svg {
+      width: 100%;
+      height: auto;
+    }
+
     .gauss-grid {
         display: inline-grid;
-        grid-template-columns: auto auto auto;
+        grid-template-columns: 1fr 2fr;
+        grid-auto-rows: min-content;
         text-align: center;
+    }
+
+    @media only screen and (max-width: 1168px) {
+      .gauss-grid {
+        display: inline-grid;
+        grid-template-columns: 1fr;
+        grid-auto-rows: min-content;
+        text-align: center;
+      }
     }
 
     .grid-item {

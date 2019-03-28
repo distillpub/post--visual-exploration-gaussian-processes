@@ -1,17 +1,19 @@
-<div>
-  <svg class="plot" ref:covMat xmlns:bind="http://www.w3.org/1999/xhtml"></svg>
+<div class="kernel-grid">
+  <div class="grid-item">
+  <svg class="plot" width="{width}" height="{height}" ref:covMat viewBox="0 0 {width} {height}" xmlns:bind="http://www.w3.org/1999/xhtml"></svg>
 </div>
 {#if slider}
+  <div class="grid-item">
 {#each params as p}
-<div>
-  <p class="label"><input disabled class="labelSlider" bind:value=p.name> = <input disabled class="entry"
+    <p class="label"> <input disabled class="labelSlider" bind:value=p.name> = <input disabled class="entry"
                                                                                    bind:value=p.value min='{p.min}'
                                                                                    max='{p.max}'></p>
   <input bind:value=p.value type='range' min='{p.min}' max='{p.max}' step='0.01'
          on:input="updateSlider(p, name, this)">
-</div>
 {/each}
+  </div>
 {/if}
+</div>
 <style>
 
   input {
@@ -20,6 +22,19 @@
 
   ref:covMat {
     background: none;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+
+  .kernel-grid {
+    display: inline-grid;
+    grid-template-rows: 1fr;
+  }
+
+
+  .grid-item {
+    /*margin: 0.5em;*/
   }
 
   .entry {
@@ -30,8 +45,8 @@
   }
 
   .labelSlider {
-    text-align: right;
-    max-width: 80px;
+    text-align: left;
+    max-width: 70px;
     border: 0px solid;
     background-color: transparent;
   }
