@@ -24,7 +24,7 @@ figure {
 }
 @media only screen and (min-width: 1168px) {
   figure {
-    overflow-x: hidden;
+    overflow-x: visible;
   }
 }
 
