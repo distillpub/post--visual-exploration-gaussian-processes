@@ -1,6 +1,6 @@
 <svg ref:svgArea width="{context.width}" height="{context.height}">
   <g ref:graph>
-    <text x="5" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
+    <text x="16" y="{toV(context, 0)-5}" class="annotation">y = 0</text>
     <line ref:zero x1="0" y1="{toV(context, 0)}" x2="{context.width}" y2="{toV(context, 0)}"> 
   </g>
   <g>
@@ -11,10 +11,10 @@
       <circle on:click="toggle(idx)" class="trainingPoint {pt.active ? 'active' : 'inactive'}" cx="{toU(context, pt.x)}" cy="{toV(context, pt.y)}" r="6" /> 
     {/each}
   </g>
-  <text x="5" y="10" class="annotation">
+  <text x="16" y="10" class="annotation">
     <tspan font-weight="bold">Regression</tspan> is used to find a function <tspan fill="#c51b8a">(line)</tspan>
-    <tspan x="5" dy="1.5em">that represents a set of data points as closely</tspan>
-    <tspan x="5" dy="1.5em">as possible</tspan>
+    <tspan x="16" dy="1.5em">that represents a set of data points as closely</tspan>
+    <tspan x="16" dy="1.5em">as possible</tspan>
   </text>
   <text x="450" y="300" class="annotation">
     A <tspan font-weight="bold">Gaussian process</tspan> is a probabilistic
@@ -29,6 +29,7 @@
 </svg>
 
 <style>
+
   ref:zero {
     stroke: rgba(0,0,0,0.2);
     stroke-width: 1px;
