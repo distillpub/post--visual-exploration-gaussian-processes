@@ -314,8 +314,8 @@
     </figure>
 
   <p> Kernels can be separated into <i>stationary</i> and <i>non-stationary</i> kernels. <i>Stationary</i> kernels, such
-    as the RBF kernel, are functions invariant to translations, and the covariance of two points is only
-    dependent on their relative position. A special case here would be the periodic kernel, which is only invariant to translations equal to the period of its respective function. <i>Non-stationary</i> kernels, such as the linear kernel, do not have this
+    as the RBF kernel or the periodic kernel, are functions invariant to translations, and the covariance of two points is only
+    dependent on their relative position. <i>Non-stationary</i> kernels, such as the linear kernel, do not have this
     constraint and depend on an absolute location. The stationary nature of the RBF kernel can be observed in the
     banding around the diagonal of its covariance matrix (as shown in <a href="#MultipleKernels">this figure</a>). Increasing the length parameter increases the banding, as
     points further away from each other become more correlated. For the periodic kernel, we have an additional parameter
