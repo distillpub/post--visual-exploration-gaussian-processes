@@ -23,9 +23,9 @@
           cov={gaussian.cov.get(0,1)}
           limits={limits} />
       <line class="line" x1="{condPos[0]}" y1="0" x2="{condPos[0]}" y2="{context.height}" />
-      <circle ref:handle class="handleInvisible" cx="{condPos[0]}" cy="{condPos[1]}" r="44"/>
       <circle class="handle" cx="{condPos[0]}" cy="{condPos[1]}" r="4"/>
       <text x="{condPos[0]+5}" y="{condPos[1]}" class="annotation handle">X = {twoDecimals(cond)}</text>
+      <circle ref:handle class="handleInvisible" cx="{condPos[0]}" cy="{condPos[1]}" r="44"/>
     </svg>
   </div>
   <div class="grid-item">
