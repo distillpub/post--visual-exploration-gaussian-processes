@@ -1,3 +1,13 @@
+#Teaser {
+  display: flex;
+  justify-content: center;
+  height: 400px;
+}
+
+#Teaser > svg {
+  display: block;
+}
+
 .l-screen {
   grid-column: screen;
   text-align: center;
