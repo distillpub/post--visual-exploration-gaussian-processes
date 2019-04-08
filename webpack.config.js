@@ -5,7 +5,7 @@ const devMode = process.env.WEBPACK_SERVE;
 
 module.exports = {
   entry: './src/main.js',
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   resolve: {
     extensions: ['.ts', '.js', '.html']
   },

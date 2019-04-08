@@ -20,6 +20,7 @@
     "eslint": "^5.12.1",
     "eslint-loader": "^2.1.1",
     "eslint-plugin-html": "^5.0.0",
+    "source-map-explorer": "^1.8.0",
     "svelte": "^2.9.1",
     "svelte-loader": "^2.12.0",
     "webpack": "^4.29.0",
