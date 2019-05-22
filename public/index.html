@@ -99,7 +99,7 @@
       \Sigma = \text{Cov}(X_i, X_j) = E \left[ (X_i - \mu_i)(X_j - \mu_j)^T \right]
     </d-math>
 
-    <p>Visually, the distribution is centered around the mean and the covariance matrix defines its shape. The <a href="#Multivariate">following figure</a> shows the influence of these parameters on a two-dimensional Gaussian distribution. The standard deviations for each random variable are on the diagonal of the covariance matrix, while the other values show the covariance between them.</p>
+    <p>Visually, the distribution is centered around the mean and the covariance matrix defines its shape. The <a href="#Multivariate">following figure</a> shows the influence of these parameters on a two-dimensional Gaussian distribution. The variances for each random variable are on the diagonal of the covariance matrix, while the other values show the covariance between them.</p>
 
     <figure>
     <d-figure id="Multivariate"></d-figure>
@@ -130,7 +130,7 @@
 
     <p>With <d-math>X</d-math> and <d-math>Y</d-math> representing subsets of original random variables.</p>
 
-    <p>Through <i>marginalization</i> we can extract partial information from multivariate probability distributions. In particular, given a normal probability distribution <d-math>P(X,Y)</d-math> over vectors of random variables <d-math>X</d-math>, and <d-math>Y</d-math>, we can determine their marginalized probability distributions in the following way:</p>
+    <p>Through <i>marginalization</i> we can extract partial information from multivariate probability distributions. In particular, given a normal probability distribution <d-math>P(X,Y)</d-math> over vectors of random variables <d-math>X</d-math> and <d-math>Y</d-math>, we can determine their marginalized probability distributions in the following way:</p>
 
     <d-math block>
       \begin{aligned}
@@ -210,7 +210,7 @@
       <d-figure id="DimensionSwap"></d-figure>
       <figcaption>
         Here, we have a two-dimensional normal distribution.
-        Each dimension is assigned an index <d-math>x_i</d-math> with <d-math>i \in \{1,2\}</d-math>.
+        Each dimension <d-math>x_i</d-math> is assigned an index <d-math>i \in \{1,2\}</d-math>.
         You can drag the handles to see how a particular sample (left) corresponds to functional values (right).
         This representation also allows us to understand the connection between the covariance and the resulting values:
         the underlying Gaussian distribution has a positive covariance between <d-math>x_1</d-math> and <d-math>x_2</d-math> &mdash; this means that <d-math>x_2</d-math> will increases as <d-math>x_1</d-math> gets larger and vice versa.
@@ -295,7 +295,7 @@
       The reason for this is that they allow similarity measures that go far beyond the standard euclidean distance (<d-math>L2</d-math>-distance).
       Many of these kernels conceptually embed the input points into a higher dimensional space in which they then measure the similarity<d-footnote>If the kernel follows Mercer's theorem it can be used to define a Hilbert space. More information on this can be found on <a href="https://en.wikipedia.org/wiki/Kernel_method">Wikipedia</a>.</d-footnote>.
       The <a href="#MultipleKernels">following figure</a> shows examples of some common kernels for Gaussian processes.
-      For each kernel, the covariance matrix has been created from <d-math>N=25</d-math> linear spaced values ranging from <d-math>[-5,5]</d-math>. Each entry in the matrix shows the covariance between points in the range of <d-math>[0,1]</d-math>.
+      For each kernel, the covariance matrix has been created from <d-math>N=25</d-math> linearly-spaced values ranging from <d-math>[-5,5]</d-math>. Each entry in the matrix shows the covariance between points in the range of <d-math>[0,1]</d-math>.
     </p>
 
   <figure class="l-middle-outset">
@@ -396,7 +396,7 @@
 
     <p>
        As mentioned before, the conditional distribution <d-math>P_{X|Y}</d-math> forces the set of functions to precisely pass through each training point.
-       In many cases this can lead to fitted functions that are unnecessary complex.
+       In many cases this can lead to fitted functions that are unnecessarily complex.
        Also, up until now, we have considered the training points <d-math>Y</d-math> to be perfect measurements.
        But in real-world scenarios this is an unrealistic assumption, since most of our data is afflicted with measurement errors or uncertainty.
        Gaussian processes offer a simple solution to this problem by modeling the error of the measurements.
@@ -422,7 +422,7 @@
     </p>
 
     <p>
-      Through <i>marginalization</i> of each random variable, we can extract the respective mean function value <d-math>\mu'_i</d-math> and standard deviation <d-math>\sigma'_i = \Sigma'_{ii}</d-math> for <d-math>i</d-math>-th test point.
+      Through the <i>marginalization</i> of each random variable, we can extract the respective mean function value <d-math>\mu'_i</d-math> and standard deviation <d-math>\sigma'_i = \Sigma'_{ii}</d-math> for the <d-math>i</d-math>-th test point.
       In contrast to the prior distribution, we set the mean to <d-math>\mu=0</d-math>.
       But when we condition the joint distribution of the test and training data the resulting distribution will most likely have a non-zero mean <d-math>\mu' \neq 0</d-math>.
       Extracting <d-math>\mu'</d-math> and <d-math>\sigma'</d-math> does not only lead to a more meaningful prediction, it also allows us to make a statement about the confidence of the prediction.
@@ -481,7 +481,7 @@
 
   <p>
     However, combinations are not limited to the above example, and there are more possibilities such as concatenation or composition with a function<d-cite key="mackay2003information"></d-cite>.
-    To show the impact of a kernel combination and how it might retain qualitative features of the individual kernels, take a look at the <a href="#KernelCombinations">figure below</a>.
+    To show the impact of a kernel combination and how it might retain qualitative features of the individual kernels, take a look at the <a href="#KernelCombinationsStatic">figure below</a>.
     If we add a periodic and a linear kernel, the global trend of the linear kernel is incorporated into the combined kernel.
     The result is a periodic function that follows a linear trend.
     When combining the same kernels through multiplication instead, the result is a periodic function with a linearly growing amplitude away from linear kernel parameter <d-math>c</d-math>.
@@ -499,7 +499,7 @@
     
     <p>
       Knowing more about how kernel combinations influence the shape of the resulting distribution, we can move on to a more complex example.
-      In the <a href="#KernelCombinationsStatic">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
+      In the <a href="#KernelCombinations">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
       Using only a linear kernel, we can mimic a normal linear regression of the points.
       At first glance, the RBF kernel accurately approximates the points.
       But since the RBF kernel is stationary it will always return to <d-math>\mu=0</d-math> in regions further away from observed training data.
