@@ -385,7 +385,7 @@
       For the next step we need one operation on Gaussian distributions that we have defined earlier.
       Using <i>conditioning</i> we can find <d-math>P_{X|Y}</d-math> from <d-math>P_{X,Y}</d-math>.
       The dimensions of this new distribution matches the number of test points <d-math>N</d-math> and the distribution is also normal.
-      It is important to note, that conditioning leads to derived versions of the mean and the standard deviation: <d-math>X|Y \sim \mathcal{N}(\mu', \Sigma')</d-math>. 
+      It is important to note that conditioning leads to derived versions of the mean and the standard deviation: <d-math>X|Y \sim \mathcal{N}(\mu', \Sigma')</d-math>. 
       More details can be found in the <a href="#MargCond">related section</a> on conditioning multivariate Gaussian distributions.
       The intuition behind this step is that the training points constrain the set of functions to those that pass through the training points.
     </p>
@@ -501,7 +501,7 @@
       Knowing more about how kernel combinations influence the shape of the resulting distribution, we can move on to a more complex example.
       In the <a href="#KernelCombinationsStatic">figure below</a>, the observed training data has an ascending trend with a periodic deviation.
       Using only a linear kernel, we can mimic a normal linear regression of the points.
-      At first glance the RBF kernel accurately approximates the points.
+      At first glance, the RBF kernel accurately approximates the points.
       But since the RBF kernel is stationary it will always return to <d-math>\mu=0</d-math> in regions further away from observed training data.
       This decreases the accuracy for predictions that reach further into the past or the future.
       An improved model can be created by combining the individual kernels through addition, which maintains both the periodic nature and the global ascending trend of the data.
