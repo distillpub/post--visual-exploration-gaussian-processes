@@ -32,7 +32,7 @@
       <svg width="{sideWidth}" height="{context.height}" viewBox="0 0 {sideWidth} {context.height}" class="plot">
       <path d="{conditionedPath}" class="line"></path>
       <text x="5" y="{toV(context, conditionedGauss.mean.get(0,0))}" class="annotation">μ<tspan class="ss">Y|X</tspan> = {twoDecimals(conditionedGauss.mean.get(0,0))}</text>
-      <text x="5" y="{context.height-10}" class="annotation">σ<tspan class="ss">Y|X</tspan> = {twoDecimals(marginalizedGauss.cov.get(0,0))}</text>
+      <text x="5" y="{context.height-10}" class="annotation">σ<tspan class="ss">Y|X</tspan> = {twoDecimals(conditionedGauss.cov.get(0,0))}</text>
     </svg>
   </div>
 </div>
